@@ -130,6 +130,15 @@ class GamePole:
         self._ships = [Ship(5 - i, tp=randint(1, 2)) for i in range(4, 0, -1) for j in range(1, i + 1)]  # инициализация кораблей
         self.ship_place()
 
+    def get_pole(self):
+        pole = [[0]*self.size for _ in range(self.size)]
+        for s in self._ships:
+            i = 0
+            for x, y in s.get_cords():
+                pole[x][y] = s[i]
+                i += 1
+        return pole[::-1]
+
 def print_matrix(m: list):
     for row in m:
         for x in row:
@@ -138,6 +147,7 @@ def print_matrix(m: list):
 
 g = GamePole(10)
 g.init()
+print_matrix(g.get_pole())
 # print([el._length for el in g._ships])
 
 # s = Ship(3, 1, 0, 3)
