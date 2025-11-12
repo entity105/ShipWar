@@ -1,11 +1,15 @@
+from random import randint
+
+
 class Ship:
     def __init__(self, length, tp=1, x=None, y=None):
         self.size = 10
         self._length = length                              # длина {1, 2, 3, 4}
-        self._x, self._y = self.set_start_cords(x, y)    # начало кор. [0, size)
+        self._x, self._y = None, None                       # начало корабля [0, size)
         self._tp = self.set_tp(tp)                                  # ориентация {1, 2}
         self._is_move = True
         self._cells = [1 for _ in range(self._length)]     # попадания
+        self.set_start_cords(x, y)
 
     @staticmethod
     def set_tp(value):
@@ -13,15 +17,24 @@ class Ship:
             return value
         print("Неверный ввод положения")
 
-    #@property
-    def set_start_cords(self, x, y):
-        if x < self.size and self.size > y:
-            return x, y
+    def get_tp(self):
+        return self._tp
+
+    def get_length(self):
+        return self._length
 
     def get_start_cords(self):
         return self._x, self._y
 
-    def get_cords(self):
+    def set_start_cords(self, x, y):        # должен быть инкапсулирован ?
+        if x is None or y is None:
+            self._x, self._y = None, None
+        elif isinstance(x, int) and isinstance(y, int) and 0 <= x <= self.size and 0 <= y < self.size:
+            self._x, self._y = x, y
+        else:
+            raise ValueError("Координатами начала корабля должны быть целые положительные входящие в диапозон числа")
+
+    def get_cords(self):                    # Возвращает кортеж из всех пар координат
         x0, y0 = self.get_start_cords()
         if self._tp == 1:
             return ((x0 + i, y0) for i in range(self._length))
@@ -54,7 +67,7 @@ class Ship:
         return True
 
     def is_out_pole(self, size):
-        if all(map(lambda r: 0 <= r[0] < size and 0 <= r[1] < size, self.get_cords())):
+        if all(map(lambda r: 0 <= r[0] < size and 0 <= r[1] < size, self.get_cords())):  # r - пара (x, y)
             return False
         return True
 
@@ -69,12 +82,39 @@ class Ship:
         self._cells[key] = value
 
 
-ship = Ship(4, 1, 0, 0)
-print(ship.get_start_cords())
-print(tuple(ship.get_cords()))
-ship.set_start_cords(4, 9)     # не работает
-print(tuple(ship.get_cords()))
-print(ship[1])
-ship[2] = 2
-print(ship._cells)
-print(ship.is_out_pole(10))
+class GamePole:
+    def __init__(self, size):
+        self._size = size
+        self._ships = []
+
+    @property
+    def size(self):
+        return self._size
+
+    @size.setter
+    def size(self, a):
+        if isinstance(a, int) and a > 0:
+            self._size = a
+
+    def ship_place(self):
+        for ship in self._ships:
+            a, b = None, None
+            if ship.get_tp() == 1:
+                a = self.size - ship.get_length() - 1
+                b = self.size - 1
+            else:
+                b = self.size - ship.get_length() - 1
+                a = self.size - 1
+            ship.set_start_cords(x=randint(0, a), y=randint(0, b))
+            #print(tuple(ship.get_cords()))
+
+    def init(self):
+        self._ships = [Ship(5 - i, tp=randint(1, 2)) for i in range(4, 0, -1) for j in range(1, i + 1)]  # инициализация кораблей
+        self.ship_place()
+
+g = GamePole(10)
+g.init()
+print([el._length for el in g._ships])
+
+
+
