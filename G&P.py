@@ -29,7 +29,7 @@ class Ship:
     def set_start_cords(self, x, y):        # должен быть инкапсулирован ?
         if x is None or y is None:
             self._x, self._y = None, None
-        elif isinstance(x, int) and isinstance(y, int) and 0 <= x <= self.size and 0 <= y <= self.size:
+        elif isinstance(x, int) and isinstance(y, int) and 0 <= x <= self.size and 0 <= y < self.size:
             self._x, self._y = x, y
             return x, y     # для метода ship_place (~100 строка)
         else:
@@ -106,8 +106,7 @@ class GamePole:
 
     @staticmethod
     def random_cords(a, b, wrong_cords: set):
-        allowed_cords = tuple(set((i, j) for i in range(1, a) for j in range(1, b)) - wrong_cords)
-        #print(allowed_cords)
+        allowed_cords = tuple(set((i, j) for i in range(a) for j in range(b)) - wrong_cords)
         return choice(allowed_cords)
 
     def ship_place(self):
@@ -116,11 +115,11 @@ class GamePole:
         for ship in self._ships:
             a, b = None, None
             if ship.get_tp() == 1:
-                a = self.size - ship.get_length()
-                b = self.size
+                a = self.size - ship.get_length() - 1
+                b = self.size - 1
             else:
-                b = self.size - ship.get_length()
-                a = self.size
+                b = self.size - ship.get_length() - 1
+                a = self.size - 1
             start_cords.append(ship.set_start_cords(*self.random_cords(a, b, busy_cords)))
             for el in ship.ship_place_cords():
                 busy_cords.update(el)
@@ -136,7 +135,7 @@ class GamePole:
         for s in self._ships:
             i = 0
             for x, y in s.get_cords():
-                pole[x-1][y-1] = s[i]
+                pole[x][y] = s[i]
                 i += 1
         return pole[::-1]
 
@@ -148,9 +147,7 @@ def print_matrix(m: list):
 
 g = GamePole(10)
 g.init()
+print_matrix(g.get_pole())
 # print([el._length for el in g._ships])
 
 # s = Ship(3, 1, 0, 3)
-# print_matrix(s.ship_place_cords())
-
-
