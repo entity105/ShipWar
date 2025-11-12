@@ -131,8 +131,6 @@ class GamePole:
         self._ships = [Ship(5 - i, tp=randint(1, 2)) for i in range(4, 0, -1) for j in range(1, i + 1)]  # инициализация кораблей
         self.ship_place()
 
-<<<<<<< HEAD
-<<<<<<< HEAD
     def get_pole(self):
         pole = [[0]*self.size for _ in range(self.size)]
         for s in self._ships:
@@ -142,10 +140,6 @@ class GamePole:
                 i += 1
         return pole[::-1]
 
-=======
->>>>>>> parent of 34f1d0b (Update G&P.py)
-=======
->>>>>>> parent of 34f1d0b (Update G&P.py)
 def print_matrix(m: list):
     for row in m:
         for x in row:
