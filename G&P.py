@@ -1,4 +1,4 @@
-from random import randint
+from random import randint, choice
 
 
 class Ship:
@@ -31,6 +31,7 @@ class Ship:
             self._x, self._y = None, None
         elif isinstance(x, int) and isinstance(y, int) and 0 <= x <= self.size and 0 <= y < self.size:
             self._x, self._y = x, y
+            return x, y     # для метода ship_place (~100 строка)
         else:
             raise ValueError("Координатами начала корабля должны быть целые положительные входящие в диапозон числа")
 
@@ -71,6 +72,13 @@ class Ship:
             return False
         return True
 
+    def ship_place_cords(self):   # отрицательные координаты
+        x0, y0 = self.get_start_cords()
+        if self._tp == 2:
+            return [[(x0 + j, y0 + i) for j in range(-1, 2)] for i in range(-1, self._length + 1)][::-1]
+        else:
+            return [[(x0 + i, y0 + j) for j in range(-1, self._length + 1)] for i in range(-1, 2)][::-1]
+
     def __getitem__(self, item):
         return self._cells[item]
 
@@ -96,7 +104,14 @@ class GamePole:
         if isinstance(a, int) and a > 0:
             self._size = a
 
+    @staticmethod
+    def random_cords(a, b, wrong_cords: set):
+        allowed_cords = tuple(set((i, j) for i in range(a) for j in range(b)) - wrong_cords)
+        return choice(allowed_cords)
+
     def ship_place(self):
+        start_cords = []
+        busy_cords = set()
         for ship in self._ships:
             a, b = None, None
             if ship.get_tp() == 1:
@@ -105,16 +120,27 @@ class GamePole:
             else:
                 b = self.size - ship.get_length() - 1
                 a = self.size - 1
-            ship.set_start_cords(x=randint(0, a), y=randint(0, b))
-            #print(tuple(ship.get_cords()))
+            start_cords.append(ship.set_start_cords(*self.random_cords(a, b, busy_cords)))
+            for el in ship.ship_place_cords():
+                busy_cords.update(el)
+        print(start_cords)
+        return start_cords
 
     def init(self):
         self._ships = [Ship(5 - i, tp=randint(1, 2)) for i in range(4, 0, -1) for j in range(1, i + 1)]  # инициализация кораблей
         self.ship_place()
 
+def print_matrix(m: list):
+    for row in m:
+        for x in row:
+            print(x, end=' ')
+        print()
+
 g = GamePole(10)
 g.init()
-print([el._length for el in g._ships])
+# print([el._length for el in g._ships])
 
+# s = Ship(3, 1, 0, 3)
+# print_matrix(s.ship_place_cords())
 
 
