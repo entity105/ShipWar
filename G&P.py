@@ -135,7 +135,7 @@ class GamePole:
         for s in self._ships:
             i = 0
             for x, y in s.get_cords():
-                pole[x][y] = s[i]
+                pole[y][x] = s[i]
                 i += 1
         return pole[::-1]
 
