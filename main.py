@@ -165,21 +165,57 @@ class GamePole:
             groups[key].append(item)
         return [tuple(group) for group in groups.values()]
 
+    @staticmethod
+    def swap_coords(matr):
+        """В каждой паре координат (кортеж) меняет местами x и y """
+        m = [[[x, y] for x, y in i] for i in matr]    # Сделали списки вместо кортежей для изменения координат
+        for i in m:  # (x, y) -> (y, x)
+            for j in i:
+                f = j[0]
+                j[0] = j[1]
+                j[1] = f
+
+        return m
+
+    @staticmethod
+    def transpose_skip_missing(matrix):
+        """Транспонирование с пропуском недостающих элементов"""
+        max_cols = max(len(row) for row in matrix)
+        transposed = []
+
+        for j in range(max_cols):
+            new_row = []
+            for i in range(len(matrix)):
+                if j < len(matrix[i]):
+                    new_row.append(matrix[i][j])
+            transposed.append(new_row)
+
+        return transposed
+
+
     def random_cords(self, a, b, wrong_cords: set, ship: Ship):
+        """Возвращает случайные координаты начала для одного корабля: пара (x, y)"""
         lenght = ship.get_length()
         tp = ship.get_tp()
         maybe_start_cords = sorted(tuple(set((i, j) for i in range(1, a + 1) for j in range(1, b + 1)) - wrong_cords))
-        maybe_start_cords_matrix = cort_sorting(maybe_start_cords)      # строки этого списка циклом пихаются в row_traversal
-        right_cords_tp1 = set()
-        right_cords_tp2 = set()
+        maybe_start_cords_matrix = self.cort_sorting(maybe_start_cords)      # строки (кортежи координат) этого списка циклом пихаются в row_traversal
+        correct_cords_tp1 = set()
+        correct_cords_tp2 = set()
         if tp == 1:
             for string in maybe_start_cords_matrix:
-                right_cords_tp1 += self.row_traversal(string, lenght)       # возвращает мн-во всевозможных координат для n-мерного корабля в данной строчке
+                correct_cords_tp1 += self.row_traversal(string, lenght)       # возвращает мн-во всевозможных координат для n-мерного корабля в данной строчке
+            return choice(list(correct_cords_tp1))
+
         else:   # для tp = 2
-            
-
-
-        return
+            transpose_m = self.transpose_skip_missing(self.swap_coords(maybe_start_cords_matrix))
+            for string in transpose_m:
+                list_swap = list(self.row_traversal(string, lenght))
+                for j in list_swap:     #обратный своп координат:  [y, x] -> [x, y]
+                    f = j[0]
+                    j[0] = j[1]
+                    j[1] = f
+                correct_cords_tp2 += set(list_swap)
+            return choice(list(correct_cords_tp1))
 
 
     def ship_place(self):
