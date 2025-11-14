@@ -152,7 +152,7 @@ class GamePole:
                 y_start = k
                 cp = 1
                 k += 1
-        return set(res)
+        return set(self.list_coords_to_tuple(res))
 
     @staticmethod
     def cort_sorting(general: list):
@@ -192,6 +192,14 @@ class GamePole:
 
         return transposed
 
+    @staticmethod
+    def list_coords_to_tuple(lst):
+        return [tuple(el) for el in lst]
+
+    @staticmethod
+    def tuple_coords_to_list(tple):
+        return [list(el) for el in tple]
+
 
     def random_cords(self, a, b, wrong_cords: set, ship: Ship):
         """Возвращает случайные координаты начала для одного корабля: пара (x, y)"""
@@ -203,19 +211,19 @@ class GamePole:
         correct_cords_tp2 = set()
         if tp == 1:
             for string in maybe_start_cords_matrix:
-                correct_cords_tp1 += self.row_traversal(string, lenght)       # возвращает мн-во всевозможных координат для n-мерного корабля в данной строчке
+                correct_cords_tp1.update(self.row_traversal(string, lenght))       # возвращает мн-во всевозможных координат для n-мерного корабля в данной строчке
             return choice(list(correct_cords_tp1))
 
         else:   # для tp = 2
             transpose_m = self.transpose_skip_missing(self.swap_coords(maybe_start_cords_matrix))
             for string in transpose_m:
-                list_swap = list(self.row_traversal(string, lenght))
+                list_swap = self.tuple_coords_to_list(list(self.row_traversal(string, lenght)))
                 for j in list_swap:     #обратный своп координат:  [y, x] -> [x, y]
                     f = j[0]
                     j[0] = j[1]
                     j[1] = f
-                correct_cords_tp2 += set(list_swap)
-            return choice(list(correct_cords_tp1))
+                correct_cords_tp2.update(set(self.list_coords_to_tuple(list_swap)))
+            return choice(list(correct_cords_tp2))
 
 
     def ship_place(self):
@@ -236,7 +244,7 @@ class GamePole:
         return start_cords
 
     def init(self):
-        self._ships = [Ship(5 - i, tp=randint(1, 2)) for i in range(4, 0, -1) for j in range(1, i + 1)]  # инициализация кораблей
+        self._ships = [Ship(5 - i, tp=randint(1, 2)) for i in range(4, 0, -1) for _ in range(1, i + 1)]  # инициализация кораблей
         self.ship_place()
 
     def get_pole(self):
