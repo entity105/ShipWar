@@ -173,8 +173,11 @@ class GamePole:
         right_cords_tp1 = set()
         right_cords_tp2 = set()
         if tp == 1:
-            for string in maybe_start_cords:
+            for string in maybe_start_cords_matrix:
                 right_cords_tp1 += self.row_traversal(string, lenght)       # возвращает мн-во всевозможных координат для n-мерного корабля в данной строчке
+        else:   # для tp = 2
+            
+
 
         return
 
