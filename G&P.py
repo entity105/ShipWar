@@ -105,9 +105,65 @@ class GamePole:
             self._size = a
 
     @staticmethod
-    def random_cords(a, b, wrong_cords: set):
-        allowed_cords = tuple(set((i, j) for i in range(1, a + 1) for j in range(1, b + 1)) - wrong_cords)
-        return choice(allowed_cords)
+    def get_matrix(coords):
+        lim = max(coords)[0]
+        matrix = [[] for _ in range(lim)]
+        for i in range(1, lim + 1):
+            for el in coords:
+                if el[0] == i:
+                    matrix[i].append(el)
+                else:
+                    continue
+        return matrix
+
+    @staticmethod
+    def count_next(row, start, difference):
+        k = 0
+        n = start + difference + 1
+        for y in row[start:]:
+            if n == y[1]:
+                k += 1
+                n += 1
+            else:
+                break
+        return k
+
+    def row_traversal(self, row: list, length):
+        """Вычисление всех возможных координат корабля (tp = 1) для строки. Возвращает множество кортежей"""
+        k = 0
+        y_start = 0
+        y_now = row[0][1]
+        cp = 0
+        res = []
+        for x, y in row:
+            if y == y_now:
+                cp += 1
+                k += 1
+                y_now += 1
+                if cp >= length:
+                    res.append(row[y_start])
+                    dy = y - k
+                    next_free_count = self.count_next(row, k - (cp - length), dy)
+                    for i in range(1, next_free_count + 1):
+                        res.append(row[y_start + i])
+                    cp = 0
+            else:
+                y_now = y + 1
+                y_start = k
+                cp = 1
+                k += 1
+        return set(res)
+
+    def random_cords(self, a, b, wrong_cords: set, ship: Ship):
+        lenght = ship.get_length()
+        tp = ship.get_tp()
+        allowed_start_cords = sorted(tuple(set((i, j) for i in range(1, a + 1) for j in range(1, b + 1)) - wrong_cords))
+        right_cords = []
+        if tp == 1:
+
+
+        return
+
 
     def ship_place(self):
         start_cords = []
@@ -120,7 +176,7 @@ class GamePole:
             else:
                 b = self.size - ship.get_length()
                 a = self.size
-            start_cords.append(ship.set_start_cords(*self.random_cords(a, b, busy_cords)))
+            start_cords.append(ship.set_start_cords(*self.random_cords(a, b, busy_cords, ship)))
             for el in ship.ship_place_cords():
                 busy_cords.update(el)
         print(start_cords)
