@@ -128,7 +128,7 @@ class GamePole:
                 break
         return k
 
-    def row_traversal(self, row: list, length):
+    def row_traversal(self, row, length):
         """Вычисление всех возможных координат корабля (tp = 1) для строки. Возвращает множество кортежей"""
         k = 0
         y_start = 0
@@ -154,13 +154,27 @@ class GamePole:
                 k += 1
         return set(res)
 
+    @staticmethod
+    def cort_sorting(general: list):
+        """Сортировка отсортированного списка кортежей координат. Возвращает список из кортежей кортежей координат"""
+        groups = {}
+        for item in general:
+            key = item[0]
+            if key not in groups:
+                groups[key] = []
+            groups[key].append(item)
+        return [tuple(group) for group in groups.values()]
+
     def random_cords(self, a, b, wrong_cords: set, ship: Ship):
         lenght = ship.get_length()
         tp = ship.get_tp()
-        allowed_start_cords = sorted(tuple(set((i, j) for i in range(1, a + 1) for j in range(1, b + 1)) - wrong_cords))
-        right_cords = []
+        maybe_start_cords = sorted(tuple(set((i, j) for i in range(1, a + 1) for j in range(1, b + 1)) - wrong_cords))
+        maybe_start_cords_matrix = cort_sorting(maybe_start_cords)      # строки этого списка циклом пихаются в row_traversal
+        right_cords_tp1 = set()
+        right_cords_tp2 = set()
         if tp == 1:
-
+            for string in maybe_start_cords:
+                right_cords_tp1 += self.row_traversal(string, lenght)       # возвращает мн-во всевозможных координат для n-мерного корабля в данной строчке
 
         return
 
@@ -171,8 +185,8 @@ class GamePole:
         for ship in self._ships:
             a, b = None, None
             if ship.get_tp() == 1:
-                a = self.size - ship.get_length()
-                b = self.size
+                a = self.size - ship.get_length()       # a - граница справа
+                b = self.size                           # b - граница сверху
             else:
                 b = self.size - ship.get_length()
                 a = self.size
