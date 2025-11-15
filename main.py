@@ -77,7 +77,7 @@ class Ship:
         if self._tp == 2:
             return [[(x0 + j, y0 + i) for j in range(-1, 2)] for i in range(-1, self._length + 1)][::-1]
         else:
-            return [[(x0 + i, y0 + j) for j in range(-1, self._length + 1)] for i in range(-1, 2)][::-1]
+            return [[(x0 + j, y0 + i) for j in range(-1, self._length + 1)] for i in range(-1, 2)][::-1]
 
     def __getitem__(self, item):
         return self._cells[item]
@@ -232,7 +232,7 @@ class GamePole:
         for ship in self._ships:
             a, b = None, None
             if ship.get_tp() == 1:
-                a = self.size - ship.get_length()       # a - граница справа
+                a = self.size - ship.get_length() + 1     # a - граница справа
                 b = self.size                           # b - граница сверху
             else:
                 b = self.size - ship.get_length()
@@ -240,11 +240,19 @@ class GamePole:
             start_cords.append(ship.set_start_cords(*self.random_cords(a, b, busy_cords, ship)))
             for el in ship.ship_place_cords():
                 busy_cords.update(el)
-        print(start_cords)
+            print(f'Начальные координаты - {ship.get_start_cords()}, tp = {ship.get_tp()}, длина = {ship.get_length()}')
+            print('Занятые координаты сейчас: ', end='\n')
+            for i in ship.ship_place_cords():
+                print(*i)
+            print(f'Занятые координаты суммарно {busy_cords}')
+        print()
+        # print(print_matrix(self.cort_sorting(sorted(list(busy_cords)))))
+        print()
         return start_cords
 
     def init(self):
-        self._ships = [Ship(5 - i, tp=randint(1, 2)) for i in range(4, 0, -1) for _ in range(1, i + 1)]  # инициализация кораблей
+        # self._ships = [Ship(5 - i, tp=randint(1, 2)) for i in range(4, 0, -1) for _ in range(1, i + 1)]  # инициализация кораблей
+        self._ships = [Ship(5 - i, tp=1) for i in range(1, 5) for _ in range(i)]
         self.ship_place()
 
     def get_pole(self):
@@ -257,14 +265,14 @@ class GamePole:
         return pole[::-1]
 
 def print_matrix(m: list):
+    k = 10
     for row in m:
+        print(f'{k}|', end=' ')
         print(' '.join(str(elem) for elem in row))
-    print('-'*19)
-    print(' '.join([str(i) for i in range(1, 11)]))
+        k -= 1
+    print("   " + '-'*19)
+    print("   " + ' '.join([str(i) for i in range(1, 11)]))
 
-g = GamePole(10)
-g.init()
-print_matrix(g.get_pole())
-# print([el._length for el in g._ships])
-
-# s = Ship(3, 1, 0, 3)
+# g = GamePole(10)
+# g.init()
+# print_matrix(g.get_pole())
