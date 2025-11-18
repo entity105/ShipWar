@@ -203,6 +203,16 @@ class GamePole:
     def ships_cords(self):
         return (coord for ship in self._ships if ship.get_start_cords() != (None, None) for coord in ship.get_cords())
 
+    def check_place(self, coord_set, wrong_cords, ship):
+        wrong_cords_new = wrong_cords
+        x_y = choice(list(coord_set))  # берём произвольную координату
+        ship.set_start_cords(*x_y)
+        place = sorted([g for k in ship.ship_place_cords() for g in k])  # координаты занимаемой области 1 корабля
+        koord = sorted(self.ships_cords())  # координаты всех кораблей
+        if any(map(lambda x: x in koord, place)):  # на любой корабль не должна накладываться область текущего корабля
+            wrong_cords_new.add(x_y)  # если накладывается -> эту начальную координату нужно исключить -> взять другую случ. координату -> та же проверка ...
+            return self.check_place(coord_set, wrong_cords, ship)  # через рекурсию
+        return x_y, wrong_cords_new
 
     def random_cords(self, a, b, w_c: set, ship: Ship):
         """Возвращает случайные координаты начала для одного корабля: пара (x, y)"""
@@ -215,13 +225,9 @@ class GamePole:
         if tp == 1:
             for string in maybe_start_cords_matrix:
                 correct_cords_set.update(self.row_traversal(string, lenght))       # возвращает мн-во всевозможных координат для n-мерного корабля в данной строчке
-            x_y = choice(list(correct_cords_set))                               # берём произвольную координату
-            place = sorted([g for k in (Ship(lenght, tp, x_y[0], x_y[1]).ship_place_cords()) for g in k])   # координаты занимаемой области 1 корабля
-            koord = sorted(self.ships_cords())      # координаты всех кораблей
-            if any(map(lambda x: x in koord, place)):       # на любой корабль не должна накладываться область текущего корабля
-                wrong_cords.add(x_y)    # если накладывается -> эту начальную координату нужно исключить -> взять другую случ. координату -> та же проверка ...
-                return self.random_cords(a, b, wrong_cords, ship)       # через рекурсию
-            return x_y
+            cord_and_wrong_cords = self.check_place(correct_cords_set, wrong_cords, ship)
+            wrong_cords.update(cord_and_wrong_cords[1])
+            return cord_and_wrong_cords[0]
 
         else:   # для tp = 2
             transpose_m = self.transpose_skip_missing(self.swap_coords(maybe_start_cords_matrix)) # (x, y) -> (y, x) + транспонирование
@@ -232,13 +238,9 @@ class GamePole:
                     j[0] = j[1]
                     j[1] = f
                 correct_cords_set.update(set(self.list_coords_to_tuple(list_swap)))     # добавляем в наше множество
-            x_y = choice(list(correct_cords_set))     # берём произвольную координату из нашего множества
-            place = sorted([g for k in (Ship(lenght, tp, x_y[0], x_y[1]).ship_place_cords()) for g in k])   # координаты занимаемой области 1 корабля
-            koord = sorted(self.ships_cords())      # координаты всех кораблей
-            if any(map(lambda x: x in koord, place)):       # на любой корабль не должна накладываться область текущего корабля
-                wrong_cords.add(x_y)    # если накладывается -> эту начальную координату нужно исключить -> взять другую случ. координату -> та же проверка ...
-                return self.random_cords(a, b, wrong_cords, ship)       # через рекурсию
-            return x_y
+            cord_and_wrong_cords = self.check_place(correct_cords_set, wrong_cords, ship)
+            wrong_cords.update(cord_and_wrong_cords[1])
+            return cord_and_wrong_cords[0]
 
 
 
@@ -257,16 +259,6 @@ class GamePole:
             start_cords.append(ship.set_start_cords(*self.random_cords(a, b, busy_cords, ship)))
             for el in ship.ship_place_cords():
                 busy_cords.update(el)
-        #     print(f'Начальные координаты - {ship.get_start_cords()}, tp = {ship.get_tp()}, длина = {ship.get_length()}')
-        #     print('Занятые координаты сейчас: ', end='\n')
-        #     for i in ship.ship_place_cords():
-        #         print(*i)
-        #     print(f"Допустимые координаты: {sorted(tuple(set((i, j) for i in range(1, a + 1) for j in range(1, b + 1)) - busy_cords))}")
-        #     print(f'Занятые координаты суммарно {sorted(tuple(busy_cords))}')
-        #     print()
-        # print()
-        # # print(print_matrix(self.cort_sorting(sorted(list(busy_cords)))))
-        # print()
         return start_cords
 
     def init(self):
