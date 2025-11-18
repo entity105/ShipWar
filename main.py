@@ -211,12 +211,11 @@ class GamePole:
         wrong_cords = w_c.copy()
         maybe_start_cords = sorted(tuple(set((i, j) for i in range(1, a + 1) for j in range(1, b + 1)) - wrong_cords))
         maybe_start_cords_matrix = self.cort_sorting(maybe_start_cords)      # строки (кортежи координат) этого списка циклом пихаются в row_traversal
-        correct_cords_tp1 = set()
-        correct_cords_tp2 = set()
+        correct_cords_set = set()
         if tp == 1:
             for string in maybe_start_cords_matrix:
-                correct_cords_tp1.update(self.row_traversal(string, lenght))       # возвращает мн-во всевозможных координат для n-мерного корабля в данной строчке
-            x_y = choice(list(correct_cords_tp1))
+                correct_cords_set.update(self.row_traversal(string, lenght))       # возвращает мн-во всевозможных координат для n-мерного корабля в данной строчке
+            x_y = choice(list(correct_cords_set))
             place = sorted([g for k in (Ship(lenght, tp, x_y[0], x_y[1]).ship_place_cords()) for g in k])
             koord = sorted(self.ships_cords())
             if any(map(lambda x: x in koord, place)):
@@ -232,10 +231,9 @@ class GamePole:
                     f = j[0]
                     j[0] = j[1]
                     j[1] = f
-                correct_cords_tp2.update(set(self.list_coords_to_tuple(list_swap)))
+                correct_cords_set.update(set(self.list_coords_to_tuple(list_swap)))
             x_y = choice(list(correct_cords_set))  # берём произвольную координату из нашего множества
-            place = sorted([g for k in (Ship(lenght, tp, x_y[0], x_y[1]).ship_place_cords()) for g in
-                            k])  # координаты занимаемой области 1 корабля
+            place = sorted([g for k in (Ship(lenght, tp, x_y[0], x_y[1]).ship_place_cords()) for g in k])  # координаты занимаемой области 1 корабля
             koord = sorted(self.ships_cords())  # координаты всех кораблей
             if any(map(lambda x: x in koord, place)):  # на любой корабль не должна накладываться область текущего корабля
                 wrong_cords.add(x_y)  # если накладывается -> эту начальную координату нужно исключить -> взять другую случ. координату -> та же проверка ...
@@ -272,7 +270,7 @@ class GamePole:
 
     def init(self):
         # self._ships = [Ship(5 - i, tp=randint(1, 2)) for i in range(4, 0, -1) for _ in range(1, i + 1)]  # инициализация кораблей
-        self._ships = [Ship(5 - i, tp=1) for i in range(1, 5) for _ in range(i)]
+        self._ships = [Ship(5 - i, tp=randint(1, 2)) for i in range(1, 5) for _ in range(i)]
         self.ship_place()
 
     def get_pole(self):
