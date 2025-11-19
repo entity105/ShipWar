@@ -1,15 +1,24 @@
 from random import randint, choice
+import copy
 
 
 class Ship:
     def __init__(self, length, tp=1, x=None, y=None):
-        self.size = 10
+        self._size = 10
         self._length = length                              # длина {1, 2, 3, 4}
         self._x, self._y = None, None                       # начало корабля [0, size)
         self._tp = self.set_tp(tp)                                  # ориентация {1, 2}
         self._is_move = True
         self._cells = [1 for _ in range(self._length)]     # попадания
         self.set_start_cords(x, y)
+
+    @property
+    def size(self):
+        return self._size
+
+    @size.setter
+    def size(self, x):
+        self._size = x
 
     @staticmethod
     def set_tp(value):
@@ -38,6 +47,8 @@ class Ship:
     def get_cords(self):
         """Возвращает кортеж из всех пар координат корабля"""
         x0, y0 = self.get_start_cords()
+        if x0 is None:
+            return None, None
         if self._tp == 1:
             return ((x0 + i, y0) for i in range(self._length))
         else:
@@ -56,22 +67,22 @@ class Ship:
         else:
             self._y += go
 
-    @staticmethod
-    def distance(coords1, coords2):
-        return ((coords1[0] - coords2[0]) ** 2) + ((coords2[1] - coords2[1]) ** 2) ** 0.5
+    # @staticmethod
+    # def distance(coords1, coords2):
+    #     return ((coords1[0] - coords2[0]) ** 2) + ((coords2[1] - coords2[1]) ** 2) ** 0.5
 
-    def is_collide(self, ship):
-        """Проверяет пересечение корабля self с кораблём ship"""
-        if not isinstance(ship, Ship):
-            print("Это не корабль!")
-            return
-        if all(self.distance(coord[0], coord[1]) > 1 for coord in zip(self.get_cords(), ship.get_cords())):
-            return False
-        return True
+    # def is_collide(self, ship):
+    #     """Проверяет пересечение корабля self с кораблём ship"""
+    #     if not isinstance(ship, Ship):
+    #         print("Это не корабль!")
+    #         return
+    #     if all(self.distance(coord[0], coord[1]) > 1 for coord in zip(self.get_cords(), ship.get_cords())):
+    #         return False
+    #     return True
 
     def is_out_pole(self, size):
         """Проверяет выход корабля self за пределы поля размером size"""
-        if all(map(lambda r: 0 <= r[0] < size and 0 <= r[1] < size, self.get_cords())):  # r - пара (x, y)
+        if all(map(lambda r: 0 < r[0] <= size and 0 < r[1] <= size, self.get_cords())):  # r - пара (x, y)
             return False
         return True
 
@@ -109,18 +120,6 @@ class GamePole:
     def size(self, a):
         if isinstance(a, int) and a > 0:
             self._size = a
-
-    # @staticmethod
-    # def get_matrix(coords):
-    #     lim = max(coords)[0]
-    #     matrix = [[] for _ in range(lim)]
-    #     for i in range(1, lim + 1):
-    #         for el in coords:
-    #             if el[0] == i:
-    #                 matrix[i].append(el)
-    #             else:
-    #                 continue
-    #     return matrix
 
     @staticmethod
     def count_next(row, start, difference):
@@ -209,16 +208,23 @@ class GamePole:
         """( ) - > [ ]"""
         return [list(el) for el in tple]
 
+    def get_ships(self):
+        return self._ships
+
     def ships_cords(self):
         """Координаты поля, совпадающие с координатами кораблей"""
         return (coord for ship in self._ships if ship.get_start_cords() != (None, None) for coord in ship.get_cords())
 
     def check_place(self, ship, coord):
         """True, если хотя бы 1 клетка области нового корабля занимает хотя бы 1 клетку другого корабля"""
-        length = ship.get_length()
-        tp = ship.get_tp()
-        place = sorted([g for k in (Ship(length, tp, coord[0], coord[1]).ship_place_cords()) for g in k])  # координаты занимаемой области одного корабля
-        koords = sorted(self.ships_cords())  # координаты всех кораблей
+        # length = ship.get_length()
+        # tp = ship.get_tp()
+        # place = sorted([g for k in (Ship(length, tp, coord[0], coord[1]).ship_place_cords()) for g in k])
+        ship_copy = copy.copy(ship)
+        ship_copy.size = self.size
+        ship_copy.set_start_cords(*coord)
+        place = sorted([g for k in ship_copy.ship_place_cords() for g in k])  # координаты занимаемой области текущего корабля
+        koords = sorted(set(self.ships_cords()) - set(ship.get_cords()))  # координаты всех кораблей кроме текущего
         return any(map(lambda x: x in koords, place))
 
     def random_cords(self, a, b, w_c: set, ship: Ship):
@@ -258,6 +264,7 @@ class GamePole:
         start_cords = []
         busy_cords = set()
         for ship in self._ships:
+            ship.size = self.size
             a, b = None, None
             if ship.get_tp() == 1:
                 a = self.size - ship.get_length() + 1     # a - граница справа
@@ -269,6 +276,19 @@ class GamePole:
             for el in ship.ship_place_cords():
                 busy_cords.update(el)
         return start_cords
+
+    def is_correct_place(self, ship):
+        return not ship.is_out_pole(self.size) and not self.check_place(ship, ship.get_start_cords())
+
+    def move_ships(self):
+        for ship in self._ships:
+            shift = choice((1, -1))
+            cord0 = tuple(ship.get_start_cords())
+            ship.move(shift)
+            if not self.is_correct_place(ship):    # если пересекает
+                ship.move(-shift - 1)
+                if not self.is_correct_place(ship):  # если опять пересекает
+                    ship.set_start_cords(*cord0)
 
     def get_pole(self):
         """Возвращает матрицу поля: 1 - корабль, 0 - пусто"""
@@ -286,14 +306,21 @@ class GamePole:
         self.ship_place()
 
 def print_matrix(m: list):
-    k = 10
     for row in m:
-        print(f'{k}|', end=' ')
         print(' '.join(str(elem) for elem in row))
-        k -= 1
-    print("   " + '-'*19)
-    print("   " + ' '.join([str(i) for i in range(1, 11)]))
 
 g = GamePole(10)
 g.init()
+p1 = tuple(g.ships_cords())
+print(p1)
+print_matrix(g.get_pole())
+print()
+g.move_ships()
+p2 = tuple(g.ships_cords())
+print(p2)
+print_matrix(g.get_pole())
+print()
+g.move_ships()
+p3 = tuple(g.ships_cords())
+print(p3)
 print_matrix(g.get_pole())
