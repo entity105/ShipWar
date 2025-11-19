@@ -67,19 +67,6 @@ class Ship:
         else:
             self._y += go
 
-    # @staticmethod
-    # def distance(coords1, coords2):
-    #     return ((coords1[0] - coords2[0]) ** 2) + ((coords2[1] - coords2[1]) ** 2) ** 0.5
-
-    # def is_collide(self, ship):
-    #     """Проверяет пересечение корабля self с кораблём ship"""
-    #     if not isinstance(ship, Ship):
-    #         print("Это не корабль!")
-    #         return
-    #     if all(self.distance(coord[0], coord[1]) > 1 for coord in zip(self.get_cords(), ship.get_cords())):
-    #         return False
-    #     return True
-
     def is_out_pole(self, size):
         """Проверяет выход корабля self за пределы поля размером size"""
         if all(map(lambda r: 0 < r[0] <= size and 0 < r[1] <= size, self.get_cords())):  # r - пара (x, y)
@@ -217,9 +204,6 @@ class GamePole:
 
     def check_place(self, ship, coord):
         """True, если хотя бы 1 клетка области нового корабля занимает хотя бы 1 клетку другого корабля"""
-        # length = ship.get_length()
-        # tp = ship.get_tp()
-        # place = sorted([g for k in (Ship(length, tp, coord[0], coord[1]).ship_place_cords()) for g in k])
         ship_copy = copy.copy(ship)
         ship_copy.size = self.size
         ship_copy.set_start_cords(*coord)
@@ -300,27 +284,11 @@ class GamePole:
                 i += 1
         return pole[::-1]
 
+    def show(self):
+        for row in self.get_pole():
+            print(' '.join(str(elem) for elem in row))
+
     def init(self):
         """Инициализатор"""
         self._ships = [Ship(5 - i, tp=randint(1, 2)) for i in range(1, 5) for _ in range(i)]
         self.ship_place()
-
-def print_matrix(m: list):
-    for row in m:
-        print(' '.join(str(elem) for elem in row))
-
-g = GamePole(10)
-g.init()
-p1 = tuple(g.ships_cords())
-print(p1)
-print_matrix(g.get_pole())
-print()
-g.move_ships()
-p2 = tuple(g.ships_cords())
-print(p2)
-print_matrix(g.get_pole())
-print()
-g.move_ships()
-p3 = tuple(g.ships_cords())
-print(p3)
-print_matrix(g.get_pole())
