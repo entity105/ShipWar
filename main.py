@@ -7,7 +7,7 @@ class Ship:
         self._size = 10
         self._length = length                              # длина {1, 2, 3, 4}
         self._x, self._y = None, None                       # начало корабля [0, size)
-        self._tp = self.set_tp(tp)                                  # ориентация {1, 2}
+        self._tp = tp                                  # ориентация {1, 2}
         self._is_move = True
         self._cells = [1 for _ in range(self._length)]     # попадания
         self.set_start_cords(x, y)
@@ -20,10 +20,14 @@ class Ship:
     def size(self, x):
         self._size = x
 
-    @staticmethod
-    def set_tp(value):
+    @property
+    def cells(self):
+        return self._cells
+
+    def set_tp(self, value):
         if isinstance(value, int) and value in (1, 2):
-            return value
+            self._tp = value
+            return
         print("Неверный ввод положения")
 
     def get_tp(self):
@@ -81,6 +85,11 @@ class Ship:
         else:
             return [[(x0 + j, y0 + i) for j in range(-1, self._length + 1) if 10 >= x0 + j > 0 and 10 >= y0 + i > 0] for i in range(-1, 2)][::-1]
 
+    def place_around(self):
+        ship_set = set(self.get_cords())
+        full_set = set(cord for string in self.ship_place_cords() for cord in string)
+        return full_set - ship_set
+
     def __getitem__(self, item):
         """Получить состояние 1 палубы корабля (1-норм, 2-подбит)"""
         return self._cells[item]
@@ -98,6 +107,7 @@ class GamePole:
     def __init__(self, size):
         self._size = size
         self._ships = []
+        self.pole = self.get_pole()
 
     @property
     def size(self):
@@ -274,6 +284,27 @@ class GamePole:
                 if not self.is_correct_place(ship):  # если опять пересекает
                     ship.set_start_cords(*cord0)
 
+    def set_ship(self):
+        """Самостоятельная расстановка"""
+        # ships = [Ship(5 - i) for i in range(1, 5) for _ in range(i)]
+        ships = [Ship(1), Ship(1)]
+        n = len(ships)
+        for _ in range(n):
+            i = int(input("Номер корабля: "))
+            ship_select = ships[i]
+            while True:
+                x, y = map(int, input().split())
+                tp = int(input("Введите положение корабля: "))
+                ship_select.set_start_cords(x, y)
+                ship_select.set_tp(tp)
+                if self.is_correct_place(ship_select):
+                    break
+                print('wrong')
+            self._ships.append(ship_select)
+            # ships.pop(i)
+            print("next")
+        self.pole = self.get_pole()
+
     def get_pole(self):
         """Возвращает матрицу поля: 1 - корабль, 0 - пусто"""
         pole = [[0]*self.size for _ in range(self.size)]
@@ -285,10 +316,12 @@ class GamePole:
         return pole[::-1]
 
     def show(self):
-        for row in self.get_pole():
+        for row in self.pole:
             print(' '.join(str(elem) for elem in row))
 
     def init(self):
         """Инициализатор"""
         self._ships = [Ship(5 - i, tp=randint(1, 2)) for i in range(1, 5) for _ in range(i)]
         self.ship_place()
+        self.pole = self.get_pole()
+
