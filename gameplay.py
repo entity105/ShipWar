@@ -1,4 +1,4 @@
-from random import randint
+from random import randint, choice
 
 from main import GamePole
 
@@ -7,6 +7,10 @@ class BattleShip:
     def __init__(self, pole1: GamePole, pole2: GamePole):
         self.__pole_obj1 = pole1
         self.__pole_obj2 = pole2
+        self.start_cords_s = None    # промах при стрельбе по направлению корбля если он не уничтожен
+        self.start_cords_p = None    # промах при неверном выборе направления
+        self.count_strike = 0     # для бота
+        self.dx, self.dy = 0, 0
 
     @staticmethod
     def auto(pole: GamePole):
@@ -35,11 +39,97 @@ class BattleShip:
                     if x_y == coord:
                         return ship, i
 
+    def smart_shooting(self, pole_obj):
+
+
     def autoshot(self, pole_obj):
-        """Выстрел компьтера"""
-        x = randint(1, pole_obj.size)
-        y = randint(1, pole_obj.size)
-        return self.shot(x, y, pole_obj)
+        """Серия выстрелов компьтера"""
+        while True:
+            if self.start_cords_s is None and self.start_cords_p is None:     # если это не продолжение серии выстрелов
+                x = randint(1, pole_obj.size)       # берём произвольные x y
+                y = randint(1, pole_obj.size)
+                damage = self.shot(x, y, pole_obj)      # Стреляем
+                if damage == 0:                         # Если 0 -> повторить попытку
+                    continue
+                if damage != 2:                         # Если не попал -> завершить попытку
+                    break
+                if self.find_ship((x-1,-y), pole_obj)[0].is_destroyed():  # Если попал и уничтожил занаво берём произвольные x y
+                    continue
+                # Если попал и не уничтожил
+                dx = choice((1, 0, -1))                     # Выбираем произвольное направление дальнейшей стрельбы
+                dy = choice((1, -1)) if dx == 0 else 0
+                x_new = x + dx          # Устанавливаем координаты
+                y_new = y + dy
+                damage = self.shot(x_new, y_new, pole_obj)      # Стреляем по этим новым координатам
+                while damage == 0:
+                    dx = choice((1, 0, -1))  # Выбираем произвольное направление дальнейшей стрельбы
+                    dy = choice((1, -1)) if dx == 0 else 0
+                    x_new = x + dx  # Устанавливаем координаты
+                    y_new = y + dy
+                    damage = self.shot(x_new, y_new, pole_obj)
+                if damage != 2:     # Если не попал
+                    self.start_cords_p = x, y      # Сохраняем исходные координаты
+                    break
+                self.count_strike = 1         # Счётчик попаданий подряд
+                while damage == 2:         # Пока попадаем
+                    x_new += dx if x_new < pole_obj.size else 0  # Сдвигаемся по выбранному направлению
+                    y_new += dy if y_new < pole_obj.size else 0
+                    self.count_strike += 1
+                    damage = self.shot(x_new, y_new, pole_obj)  # и стреляем
+                    if self.find_ship((x-1,-y), pole_obj)[0].is_destroyed():   # Если уничтожил
+                        break       # Прекращаем стрельбу по этому кораблю
+                if damage == 0:
+                    continue
+                if damage != 2:     # Если промахнулся
+                    self.start_cords_s = x, y  # Координаты начала (на которых закончлась 1 часть корабля)
+                    self.dx = dx        # Сохраняем направление корабля для следующего выстрела
+                    self.dy = dy
+                    break
+            elif self.start_cords_p is not None:   # Если выбрали неверное направление
+                x, y = self.start_cords_p
+                dx = choice((1, 0, -1))  # Выбираем произвольное направление дальнейшей стрельбы
+                dy = choice((1, -1)) if dx == 0 else 0
+                x_new = x + dx  # Устанавливаем координаты
+                y_new = y + dy
+                damage = self.shot(x_new, y_new, pole_obj)  # Стреляем по этим новым координатам
+                while damage == 0:
+                    dx = choice((1, 0, -1))  # Выбираем произвольное направление дальнейшей стрельбы
+                    dy = choice((1, -1)) if dx == 0 else 0
+                    x_new = x + dx  # Устанавливаем координаты
+                    y_new = y + dy
+                    damage = self.shot(x_new, y_new, pole_obj)
+                if damage != 2:     # Если не попал
+                    self.start_cords_p = x, y      # Сохраняем исходные координаты
+                    break
+                self.count_strike = 1         # Счётчик попаданий подряд
+                self.start_cords_p = None
+                while damage == 2:         # Пока попадаем
+                    x_new += dx if x_new < pole_obj.size else 0     # Сдвигаемся по выбранному направлению
+                    y_new += dy if y_new < pole_obj.size else 0
+                    self.count_strike += 1
+                    damage = self.shot(x_new, y_new, pole_obj)  # и стреляем
+                    if self.find_ship((x-1,-y), pole_obj)[0].is_destroyed():   # Если уничтожил
+                        break       # Прекращаем стрельбу по этому кораблю
+                if damage == 0:
+                    continue
+                if damage != 2:     # Если промахнулся
+                    self.start_cords_s = x, y  # Координаты начала (на которых закончлась 1 часть корабля)
+                    self.dx = dx        # Сохраняем направление корабля для следующего выстрела
+                    self.dy = dy
+                    break
+            # Добиваем
+            else:
+                x, y = self.start_cords_s
+                dx, dy = -self.dx, -self.dy
+                x += dx
+                y += dy
+                damage = self.shot(x, y, pole_obj)
+                while damage == 2:
+                    x += dx  # Сдвигаемся по выбранному направлению
+                    y += dy
+                    damage = self.shot(x, y, pole_obj)  # и стреляем
+                    if self.find_ship((x, y), pole_obj)[0].is_destroyed():  # Если уничтожил
+                        break  # Прекращаем стрельбу по этому кораблю
 
     def shot(self, x, y, pole_obj):
         x, y = x - 1, -y
@@ -52,7 +142,7 @@ class BattleShip:
             # print(self.find_ship((x, y), pole_obj))
             ship, i = self.find_ship((x, y), pole_obj)
             ship[i] = 2
-            if ship.cells.count(2) == ship.get_length():
+            if ship.is_destroyed():
                 for x, y in ship.place_around():
                     pole_obj.pole[-y][x-1] = 3
             return 2
@@ -81,17 +171,23 @@ p2 = GamePole(SIZE)
 
 game = BattleShip(p1, p2)
 game.auto(game.pole_obj_1)
-game.auto(game.pole_obj_2)
+# game.auto(game.pole_obj_2)
 
 game.pole_obj_1.show()
+game.autoshot(game.pole_obj_1)
+game.autoshot(game.pole_obj_1)
+game.autoshot(game.pole_obj_1)
+game.autoshot(game.pole_obj_1)
+game.autoshot(game.pole_obj_1)
+game.autoshot(game.pole_obj_1)
 print()
-game.pole_obj_2.show()
-print()
-
-game.game(game.pole_obj_1, game.pole_obj_2)
-
 game.pole_obj_1.show()
-print()
-game.pole_obj_2.show()
+# print()
+#
+# game.game(game.pole_obj_1, game.pole_obj_2)
+#
+# game.pole_obj_1.show()
+# print()
+# game.pole_obj_2.show()
 
 

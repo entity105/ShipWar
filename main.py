@@ -24,6 +24,9 @@ class Ship:
     def cells(self):
         return self._cells
 
+    def is_destroyed(self):
+        return self.cells.count(2) == self.get_length()
+
     def set_tp(self, value):
         if isinstance(value, int) and value in (1, 2):
             self._tp = value
