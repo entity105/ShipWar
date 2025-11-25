@@ -1,4 +1,6 @@
-from main import GamePole, Ship
+from random import randint
+
+from main import GamePole
 
 
 class BattleShip:
@@ -33,6 +35,12 @@ class BattleShip:
                     if x_y == coord:
                         return ship, i
 
+    def autoshot(self, pole_obj):
+        """Выстрел компьтера"""
+        x = randint(1, pole_obj.size)
+        y = randint(1, pole_obj.size)
+        return self.shot(x, y, pole_obj)
+
     def shot(self, x, y, pole_obj):
         x, y = x - 1, -y
         place = pole_obj.get_pole()[y][x]
@@ -41,15 +49,31 @@ class BattleShip:
             return 1
         elif place == 1:
             pole_obj.pole[y][x] = 2
-            print(self.find_ship((x, y), pole_obj))
+            # print(self.find_ship((x, y), pole_obj))
             ship, i = self.find_ship((x, y), pole_obj)
             ship[i] = 2
             if ship.cells.count(2) == ship.get_length():
                 for x, y in ship.place_around():
                     pole_obj.pole[-y][x-1] = 3
-            return 1
+            return 2
         else: # если там 2 или 3
             return 0
+
+    def game(self, p_1, p_2):
+        while not all(map(lambda x: x.cells.count(2) == x.get_length(), p_1.get_ships())) and not all(map(lambda x: x.cells.count(2) == x.get_length(), p_2.get_ships())):
+            # count_strike1 = self.shot(int(input()), int(input()), p_1)
+            # while count_strike1 == 2:
+            #     count_strike1 = self.shot(int(input()), int(input()), p_1)
+
+            count_strike1 = self.autoshot(p_1)
+            while count_strike1 == 2:
+                count_strike1 = self.autoshot(p_1)
+
+            count_strike2 = self.autoshot(p_2)
+            while count_strike2 == 2:
+                count_strike2 = self.autoshot(p_2)
+
+
 
 SIZE = 10
 p1 = GamePole(SIZE)
@@ -59,18 +83,15 @@ game = BattleShip(p1, p2)
 game.auto(game.pole_obj_1)
 game.auto(game.pole_obj_2)
 
+game.pole_obj_1.show()
+print()
 game.pole_obj_2.show()
 print()
 
-game.shot(5, 5, game.pole_obj_2)
-game.shot(1, 1, game.pole_obj_2)
-game.shot(5, 2, game.pole_obj_2)
-game.shot(6, 5, game.pole_obj_2)
-game.shot(8, 5, game.pole_obj_2)
-game.shot(1, 5, game.pole_obj_2)
-game.shot(1, 3, game.pole_obj_2)
-game.shot(9, 2, game.pole_obj_2)
+game.game(game.pole_obj_1, game.pole_obj_2)
 
-
+game.pole_obj_1.show()
+print()
 game.pole_obj_2.show()
+
 
