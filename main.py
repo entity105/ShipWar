@@ -110,7 +110,7 @@ class GamePole:
     def __init__(self, size):
         self._size = size
         self._ships = []
-        self.pole = self.get_pole()
+        self.__pole = self.get_pole()
 
     @property
     def size(self):
@@ -120,6 +120,14 @@ class GamePole:
     def size(self, a):
         if isinstance(a, int) and a > 0:
             self._size = a
+
+    @property
+    def pole(self):
+        return self.__pole
+
+    @pole.setter
+    def pole(self, m):
+        self.__pole = m
 
     @staticmethod
     def count_next(row, start, difference):
@@ -250,7 +258,10 @@ class GamePole:
                     j[0] = j[1]
                     j[1] = f
                 correct_cords_set.update(set(self.list_coords_to_tuple(list_swap)))
-            x_y = choice(list(correct_cords_set))  # берём произвольную координату из нашего множества
+            try:
+                x_y = choice(list(correct_cords_set))  # берём произвольную координату из нашего множества
+            except IndexError:
+                return False
             if self.check_place(ship, x_y):  # на любой корабль не должна накладываться область текущего корабля
                 wrong_cords.add(x_y)  # если накладывается -> эту начальную координату нужно исключить -> взять другую случ. координату -> та же проверка ...
                 return self.random_cords(a, b, wrong_cords, ship)  # через рекурсию
@@ -269,7 +280,10 @@ class GamePole:
             else:
                 b = self.size - ship.get_length()
                 a = self.size
-            start_cords.append(ship.set_start_cords(*self.random_cords(a, b, busy_cords, ship)))
+            rand_coords = self.random_cords(a, b, busy_cords, ship)
+            if not rand_coords:
+                return self.ship_place()
+            start_cords.append(ship.set_start_cords(*rand_coords))
             for el in ship.ship_place_cords():
                 busy_cords.update(el)
         return start_cords
