@@ -7,10 +7,8 @@ class BattleShip:
     def __init__(self, pole1: GamePole, pole2: GamePole):
         self.__pole_obj1 = pole1
         self.__pole_obj2 = pole2
-        self.start_cords_s = None    # промах при стрельбе по направлению корбля если он не уничтожен
-        self.start_cords_p = None    # промах при неверном выборе направления
-        self.count_strike = 0     # для бота
-        self.dx, self.dy = 0, 0
+
+        self.start_cords_s = None    # сохранение первого попадания (для автоматического режима)
 
     @staticmethod
     def auto(pole: GamePole):
@@ -69,7 +67,6 @@ class BattleShip:
         while damage == 2:  # Пока попадаем
             if self.find_ship((x - 1, -y), pole_obj)[0].is_destroyed():  # Если корабль уничтожен
                 self.start_cords_s = None
-                self.start_cords_p = None
                 return True
             if dx != 0:     # Сдвигаемся по направлению
                 x += dx
@@ -96,18 +93,16 @@ class BattleShip:
             if damage != 2:
                 raise ValueError("Error: корабль должен быть гарантированно уничтожен")
             self.start_cords_s = None
-            self.start_cords_p = None
             return True
 
         # Если не уничтожил, сохраняем координаты начала корабля, чтобы потом пойти в противоположную сторону от начала
         self.start_cords_s = x0, y0
-        self.start_cords_p = None
         return False
 
     def autoshot(self, pole_obj):
         """Серия умных выстрелов компьтера"""
         while True:
-            if self.start_cords_s is None and self.start_cords_p is None:     # если это не продолжение серии выстрелов
+            if self.start_cords_s is None:     # если это не продолжение серии выстрелов
                 x = randint(1, pole_obj.size)       # берём произвольные x y
                 y = randint(1, pole_obj.size)
                 damage = self.shot(x, y, pole_obj)      # Стреляем
@@ -130,6 +125,7 @@ class BattleShip:
                 break
 
     def shot(self, x, y, pole_obj):
+        """Одиночный выстрел по заданным координатам"""
         x, y = x - 1, -y        # Перевод в матричные координаты
         place = pole_obj.pole[y][x]
         if place == 0:
