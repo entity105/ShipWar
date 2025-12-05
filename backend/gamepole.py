@@ -197,27 +197,6 @@ class GamePole:
                 if not self.is_correct_place(ship):  # если опять пересекает
                     ship.set_start_cords(*cord0)
 
-    def set_ship(self):
-        """Самостоятельная расстановка"""
-        # ships = [Ship(5 - i) for i in range(1, 5) for _ in range(i)]
-        ships = [Ship(1), Ship(1)]
-        n = len(ships)
-        for _ in range(n):
-            i = int(input("Номер корабля: "))
-            ship_select = ships[i]
-            while True:
-                x, y = map(int, input().split())
-                tp = int(input("Введите положение корабля: "))
-                ship_select.set_start_cords(x, y)
-                ship_select.set_tp(tp)
-                if self.is_correct_place(ship_select):
-                    break
-                print('wrong')
-            self._ships.append(ship_select)
-            # ships.pop(i)
-            print("next")
-        self.pole = self.get_pole()
-
     def get_pole(self):
         """Возвращает матрицу поля: 1 - корабль, 0 - пусто"""
         pole = [[0]*self.size for _ in range(self.size)]
