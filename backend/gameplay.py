@@ -1,6 +1,6 @@
 from random import randint, choice
 
-from main import GamePole
+from gamePole import GamePole
 
 
 class BattleShip:
