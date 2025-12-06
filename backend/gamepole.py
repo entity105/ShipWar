@@ -6,7 +6,7 @@ class GamePole:
     def __init__(self, size):
         self._size = size
         self._ships = []
-        self.__pole = self.get_pole()
+        self.__pole = self.init_pole()
 
     @property
     def size(self):
@@ -197,8 +197,8 @@ class GamePole:
                 if not self.is_correct_place(ship):  # если опять пересекает
                     ship.set_start_cords(*cord0)
 
-    def get_pole(self):
-        """Возвращает матрицу поля: 1 - корабль, 0 - пусто"""
+    def init_pole(self):
+        """Возвращает начальную матрицу поля: 1 - корабль, 0 - пусто"""
         pole = [[0]*self.size for _ in range(self.size)]
         for s in self._ships:
             i = 0
@@ -206,6 +206,9 @@ class GamePole:
                 pole[y-1][x-1] = s[i]
                 i += 1
         return pole[::-1]
+
+    # def get_pole(self):
+    #     return [' '.join(int(elem) for elem in row) for row in self.pole]
 
     def show(self):
         for row in self.pole:
@@ -215,5 +218,4 @@ class GamePole:
         """Инициализатор"""
         self._ships = [Ship(5 - i, tp=randint(1, 2)) for i in range(1, 5) for _ in range(i)]
         self.ship_place()
-        self.pole = self.get_pole()
-
+        self.pole = self.init_pole()

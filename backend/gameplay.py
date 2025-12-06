@@ -1,12 +1,11 @@
 from random import randint, choice
 
-from gamepole import GamePole
+from backend.gamepole import GamePole
 
 
 class BattleShip:
-    def __init__(self, pole1: GamePole, pole2: GamePole):
+    def __init__(self, pole1: GamePole):
         self.__pole_obj1 = pole1
-        self.__pole_obj2 = pole2
 
         self.start_cords_s = None    # сохранение первого попадания (для автоматического режима)
 
@@ -15,23 +14,19 @@ class BattleShip:
         """Авто расстановка кораблей для заданного поля"""
         pole.init()
 
-    @staticmethod
-    def set_ship(pole: GamePole):
-        """Самостоятельная расстановка"""
-        pole.set_ship()
+    # @staticmethod
+    # def set_ship(pole: GamePole):
+    #     """Самостоятельная расстановка"""
+    #     pole.set_ship()
 
     @property
     def pole_obj_1(self):
         return self.__pole_obj1
 
-    @property
-    def pole_obj_2(self):
-        return self.__pole_obj2
-
     @staticmethod
     def find_ship(x_y0: tuple, pole_obj):
         """x, y -> ссылка на корабль + индекс координаты"""
-        x_y = x_y0[0] + 1, -x_y0[1]
+        x_y = x_y0[0] + 1, 10 - x_y0[1]
         for ship in pole_obj.get_ships():
             coords = tuple(ship.get_cords())
             if x_y in coords:
@@ -126,7 +121,7 @@ class BattleShip:
 
     def shot(self, x, y, pole_obj):
         """Одиночный выстрел по заданным координатам"""
-        x, y = x - 1, -y        # Перевод в матричные координаты
+        # x, y = x - 1, -y        # Перевод в матричные координаты
         place = pole_obj.pole[y][x]
         if place == 0:
             pole_obj.pole[y][x] = 3
@@ -141,52 +136,20 @@ class BattleShip:
             return 2
         else: # если там 2 или 3
             return False
-
-    def game(self, p_1, p_2):
-        while not all(map(lambda x: x.is_destroyed(), p_1.get_ships())) and not all(map(lambda x: x.is_destroyed(), p_2.get_ships())):
-            # count_strike1 = self.shot(int(input()), int(input()), p_1)
-            # while count_strike1 == 2:
-            #     count_strike1 = self.shot(int(input()), int(input()), p_1)
-
-            count_strike1 = self.autoshot(p_1)
-            while count_strike1 == 2:
-                count_strike1 = self.autoshot(p_1)
-
-            count_strike2 = self.autoshot(p_2)
-            while count_strike2 == 2:
-                count_strike2 = self.autoshot(p_2)
-        pass
-
-
-SIZE = 10
-p1 = GamePole(SIZE)
-p2 = GamePole(SIZE)
-game = BattleShip(p1, p2)
-game.auto(game.pole_obj_2)
-
-game.pole_obj_1.show()
-
-
-game.auto(game.pole_obj_1)
-game.autoshot(game.pole_obj_1)
-game.autoshot(game.pole_obj_1)
-game.autoshot(game.pole_obj_1)
-game.autoshot(game.pole_obj_1)
-game.autoshot(game.pole_obj_1)
-game.autoshot(game.pole_obj_1)
-game.autoshot(game.pole_obj_1)
-game.autoshot(game.pole_obj_1)
-game.autoshot(game.pole_obj_1)
-game.autoshot(game.pole_obj_1)
-game.autoshot(game.pole_obj_1)
-print()
-game.pole_obj_1.show()
-print()
-#
-# game.game(game.pole_obj_1, game.pole_obj_2)
-#
-# game.pole_obj_1.show()
-# print()
-# game.pole_obj_2.show()
+    #
+    # def game(self, p_1, p_2):
+    #     while not all(map(lambda x: x.is_destroyed(), p_1.get_ships())) and not all(map(lambda x: x.is_destroyed(), p_2.get_ships())):
+    #         # count_strike1 = self.shot(int(input()), int(input()), p_1)
+    #         # while count_strike1 == 2:
+    #         #     count_strike1 = self.shot(int(input()), int(input()), p_1)
+    #
+    #         count_strike1 = self.autoshot(p_1)
+    #         while count_strike1 == 2:
+    #             count_strike1 = self.autoshot(p_1)
+    #
+    #         count_strike2 = self.autoshot(p_2)
+    #         while count_strike2 == 2:
+    #             count_strike2 = self.autoshot(p_2)
+    #     pass
 
 

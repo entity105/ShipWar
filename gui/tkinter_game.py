@@ -10,7 +10,6 @@ class GameWindow:
         self.player_field = BattlefieldPlayer(self.win)
         self.computer_field = BattlefieldComputer(self.win)
         self.computer_field.draw_pole()
-        self.computer_field().pack()
         self.win.mainloop()
 
     def run(self):
