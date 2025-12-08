@@ -16,24 +16,19 @@ class BattlefieldCanvas:
             bg='#ADD8E6'
         )
 
+        self.show_ships = None
+
     def __call__(self, *args, **kwargs):
         return self.canvas
 
     def click_lkm(self, event):
         cell_x = event.x // self.cell_size  # от 0 до 9
         cell_y = event.y // self.cell_size  # от 0 до 9
-        # print(f'{cell_x}, {cell_y}')
 
         if 0 <= cell_x < 10 and 0 <= cell_y < 10:
             self.battle_ship_obj.shot(cell_x, cell_y, self.field_data)
+            self.canvas.delete("all")
             self.draw_pole()
-            # self.make_cell(cell_x*50, cell_y*50, self.field_data.pole()[cell_y][cell_x])
-            # self.field_data.show()
-            # print('Матрица:')
-            # for i in self.field_data.pole:
-            #     for j in i:
-            #         print(j, end=' ')
-            #     print()
 
     def make_cell(self, x0, y0, state):
         x, y = x0 + self.cell_size, y0 + self.cell_size     # Конечные координаты клеточки
@@ -45,6 +40,9 @@ class BattlefieldCanvas:
             2: '#FF0000',  # попадание
             3: '#FFFFFF',  # промах
         }
+
+        if not self.show_ships:
+            colors[1] = colors[0]
 
         self().create_rectangle(
             x0, y0, x, y,
@@ -66,11 +64,14 @@ class BattlefieldCanvas:
 
 
 class BattlefieldPlayer(BattlefieldCanvas):
-    def __init__(self, parent, size=500):
+    def __init__(self, parent, size=500, begin=True):
         super().__init__(parent, size)
         # self.field_data.set_ship()
         self.show_ships = True
-        self.canvas.place(x=60, y=80)
+        if begin:
+            self.canvas.place(x=100, y=40)
+        else:
+            self.canvas.place(x=60, y=80)
 
 
 class BattlefieldComputer(BattlefieldCanvas):
