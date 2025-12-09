@@ -60,8 +60,11 @@ class PredGame(BaseWindow):
         self.player_field = None
         super().__init__()
 
+        self.data_save = None
+
     def win_place(self):
         self.win.geometry('1980x920')
+        self.win.config(bg='#c5d8e7')
 
     def win_init(self):
         self.player_field = BattlefieldPlayer(self.win, size=650)
@@ -84,6 +87,8 @@ class PredGame(BaseWindow):
 
     def auto(self):
         self.player_field.field_data.init()
+        self.data_save = self.player_field.field_data.pole      # Сохраняем матрицу
+        self.player_field.matrix = self.data_save
         self.player_field.canvas.delete("all")
         self.player_field.draw_pole()
 
@@ -94,21 +99,26 @@ class PredGame(BaseWindow):
 
     def start_game(self):
         self.win.destroy()
-        game = GameWindow()
+        game = GameWindow(self.data_save)
         self.win = game.win
 
 
 class GameWindow(BaseWindow):
-    def __init__(self):
+    def __init__(self, matrix_player):
         self.player_field = self.computer_field = None
+        self.matrix_player = matrix_player
         super().__init__()
 
     def win_place(self):
         self.win.geometry('1980x920')
 
     def win_init(self):
-        self.player_field = BattlefieldPlayer(self.win, begin=False).draw_pole()
-        self.computer_field = BattlefieldComputer(self.win).draw_pole()
+        self.player_field = BattlefieldPlayer(self.win, begin=False)
+        self.player_field.matrix = self.matrix_player
+        self.player_field.draw_pole()
+
+        self.computer_field = BattlefieldComputer(self.win)
+        self.computer_field.draw_pole()
 
 
     def start_game(self):
@@ -118,7 +128,7 @@ class GameWindow(BaseWindow):
         self.win.mainloop()
 
 
-a = PredGame()
+a = MenuWindow()
 
 # Нужно сделать:
 # 1) start_game

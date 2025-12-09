@@ -3,23 +3,23 @@ from backend.gamepole import GamePole
 from backend.gameplay import BattleShip
 
 class BattlefieldCanvas:
-    def __init__(self, parent: tk.Tk, size=500):
+    def __init__(self, parent, size=500):
+        self.parent = parent
         self.battle_ship_obj = BattleShip(GamePole(10))       # Объект BattleShip. По сути тот же GamePole, но с дополнительными методами
         self.field_data = self.battle_ship_obj.pole_obj_1     # Взяли объект GamePole
+        self.matrix = self.field_data.pole                    # Взяли матрицу из GamePole
+
         self.cell_count = self.field_data.size
         self.cell_size = size // self.cell_count
 
         self.canvas = tk.Canvas(
-            parent,
+            self.parent,
             width=size,
             height=size,
             bg='#ADD8E6'
         )
 
         self.show_ships = None
-
-    def __call__(self, *args, **kwargs):
-        return self.canvas
 
     def click_lkm(self, event):
         cell_x = event.x // self.cell_size  # от 0 до 9
@@ -44,7 +44,7 @@ class BattlefieldCanvas:
         if not self.show_ships:
             colors[1] = colors[0]
 
-        self().create_rectangle(
+        self.canvas.create_rectangle(
             x0, y0, x, y,
             outline='#2C5282',  # ГРАНИЦА
             width=2,
@@ -54,7 +54,7 @@ class BattlefieldCanvas:
     def draw_pole(self):
         dx = dy = 0
         size = self.cell_size
-        matrix_data = self.field_data.pole
+        matrix_data = self.matrix
         for i in range(self.cell_count):
             for j in range(self.cell_count):
                 self.make_cell(0 + dx, 0 + dy, matrix_data[i][j])
@@ -78,6 +78,7 @@ class BattlefieldComputer(BattlefieldCanvas):
     def __init__(self, parent, size=500):
         super().__init__(parent, size)
         self.field_data.init()
+        self.matrix = self.field_data.pole
         self.show_ships = False
         self.canvas.place(x=200+size, y=80)
 
