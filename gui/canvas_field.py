@@ -21,15 +21,6 @@ class BattlefieldCanvas:
 
         self.show_ships = None
 
-    def click_lkm(self, event):
-        cell_x = event.x // self.cell_size  # от 0 до 9
-        cell_y = event.y // self.cell_size  # от 0 до 9
-
-        if 0 <= cell_x < 10 and 0 <= cell_y < 10:
-            self.battle_ship_obj.shot(cell_x, cell_y, self.field_data)
-            self.canvas.delete("all")
-            self.draw_pole()
-
     def make_cell(self, x0, y0, state):
         x, y = x0 + self.cell_size, y0 + self.cell_size     # Конечные координаты клеточки
 
@@ -66,6 +57,7 @@ class BattlefieldCanvas:
 class BattlefieldPlayer(BattlefieldCanvas):
     def __init__(self, parent, size=500, begin=True):
         super().__init__(parent, size)
+        self.computer = None     # объект BattlefieldComputer
         # self.field_data.set_ship()
         self.show_ships = True
         if begin:
@@ -73,15 +65,62 @@ class BattlefieldPlayer(BattlefieldCanvas):
         else:
             self.canvas.place(x=60, y=80)
 
+    def computer_shot(self):
+        self.field_data.pole = self.matrix
+        print(self.field_data.pole)
+        self.battle_ship_obj.autoshot(self.field_data)   # Делает все выстрелы
+        print(self.field_data.pole)
+        self.canvas.delete("all")
+        self.draw_pole()
+        self.computer.enable_clicks()
+
 
 class BattlefieldComputer(BattlefieldCanvas):
     def __init__(self, parent, size=500):
         super().__init__(parent, size)
         self.field_data.init()
+        self.player = None    # объект BattlefieldPlayer
         self.matrix = self.field_data.pole
         self.show_ships = False
+        self.res = None
         self.canvas.place(x=200+size, y=80)
 
-        self.canvas.bind('<Button-1>', self.click_lkm)
+        self.cell_x = self.cell_y = None
+
+        self.click_binding = self.canvas.bind('<Button-1>', self.click_lkm)
+
+    def click_lkm(self, event):
+        self.cell_x = event.x // self.cell_size  # от 0 до 9
+        self.cell_y = event.y // self.cell_size  # от 0 до 9
+
+        if 0 <= self.cell_x < 10 and 0 <= self.cell_y < 10:
+            self.res = self.battle_ship_obj.shot(self.cell_x, self.cell_y, self.field_data)
+            self.canvas.delete("all")
+            self.draw_pole()
+        self.processing_move()
+
+    def is_hit(self):
+        for ship in self.field_data.get_ships():
+            if (self.cell_x, self.cell_y) in ship.get_cords():
+                return True
+        return False
+
+    def processing_move(self):   # Обработка хода (что делать дальше)
+        if self.is_hit():  # Если попали
+            return
+        # Если промах
+        self.disable_clicks()       # Отключаем у нас клики (на поле бота)
+        self.parent.after(1000, self.player.computer_shot)  # Бот стреляет
+
+    def disable_clicks(self):
+        """Отключить клики"""
+        if self.click_binding:
+            self.canvas.unbind('<Button-1>', self.click_binding)
+            self.click_binding = None
+
+    def enable_clicks(self):
+        """Включить клики"""
+        if not self.click_binding:
+            self.click_binding = self.canvas.bind('<Button-1>', self.click_lkm)
 
 

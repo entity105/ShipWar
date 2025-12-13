@@ -1,7 +1,10 @@
 import tkinter as tk
+
+from backend.gameplay import BattleShip
 # from tkinter import ttk
 from gui.canvas_field import BattlefieldPlayer, BattlefieldComputer
 from abc import abstractmethod
+from random import choice
 
 
 class BaseWindow:
@@ -49,6 +52,8 @@ class MenuWindow(BaseWindow):
         tk.Button(self.win, text="Выход", **style, font=("Impact", 24),
                   padx=40, command=self.win.quit).pack()
 
+        # Мб добавить ссылку на тг
+
     def new_game(self):
         self.win.destroy()
         new_win = PredGame()
@@ -79,7 +84,7 @@ class PredGame(BaseWindow):
                  bg='#cecfee', bd=5, fg='#191f8f',
                  activebackground='red').place(x=1090, y=702)
 
-        tk.Button(self.win, text="Авто", command=self.auto,
+        tk.Button(self.win, text="Авто", command=self.auto,     # Авторасстановка
                  padx=15, pady=3, font=("Impact", 20),
                  bg='#cecfee', bd=5, fg='#191f8f',
                  activebackground='#439ae5').place(x=780, y=45)
@@ -108,21 +113,32 @@ class GameWindow(BaseWindow):
         self.player_field = self.computer_field = None
         self.matrix_player = matrix_player
         super().__init__()
+        # self.win = tk.Tk()
+        # self.win_place()
+        # self.win_init()
+        # self.win.mainloop()
+
 
     def win_place(self):
         self.win.geometry('1980x920')
 
     def win_init(self):
         self.player_field = BattlefieldPlayer(self.win, begin=False)
-        self.player_field.matrix = self.matrix_player
-        self.player_field.draw_pole()
-
         self.computer_field = BattlefieldComputer(self.win)
+
+        self.player_field.computer = self.computer_field
+        self.computer_field.player = self.player_field
+
+        self.player_field.matrix = self.matrix_player
+        print(f'win_init {self.player_field.matrix}')
+        self.player_field.draw_pole()
         self.computer_field.draw_pole()
 
 
-    def start_game(self):
-        pass
+    # def game(self):
+
+
+
 
     def run(self):
         self.win.mainloop()

@@ -26,14 +26,26 @@ class BattleShip:
     @staticmethod
     def find_ship(x_y0: tuple, pole_obj):
         """x, y -> ссылка на корабль + индекс координаты"""
-        x_y = x_y0[0] + 1, 10 - x_y0[1]
+        x_y = x_y0[0], x_y0[1]
         for ship in pole_obj.get_ships():
             coords = tuple(ship.get_cords())
             if x_y in coords:
                 for i, coord in enumerate(coords):
                     if x_y == coord:
                         return ship, i
-        raise Exception("Не найден корабль (метод find_ship)")
+        # raise Exception("Не найден корабль (метод find_ship)")
+        else:   # отладка
+            print(f'Матричные координаты корабля, в которого попали: {x_y0}\n')
+            print(f'Преобразованные координаты: {x_y}\n')
+            print('Поле:')
+            print('***********************************************')
+            pole_obj.show()
+            print('***********************************************')
+            print('Координаты всех кораблей:')
+            for ship_d in pole_obj.get_ships():
+                print(tuple(ship_d.get_cords()))
+            # raise ValueError
+
 
     def smart_shooting(self, x0, y0, pole_obj):
         """True - уничтожил корабль, False - промах"""
@@ -98,8 +110,8 @@ class BattleShip:
         """Серия умных выстрелов компьтера"""
         while True:
             if self.start_cords_s is None:     # если это не продолжение серии выстрелов
-                x = randint(1, pole_obj.size)       # берём произвольные x y
-                y = randint(1, pole_obj.size)
+                x = randint(0, pole_obj.size - 1)       # берём произвольные x y
+                y = randint(0, pole_obj.size - 1)
                 damage = self.shot(x, y, pole_obj)      # Стреляем
 
                 if not damage:                         # Если туда нельзя стрельнуть -> повторить попытку
@@ -121,7 +133,8 @@ class BattleShip:
 
     def shot(self, x, y, pole_obj):
         """Одиночный выстрел по заданным координатам"""
-        # x, y = x - 1, -y        # Перевод в матричные координаты
+        print(f"x: {x}")
+        print(f"y: {y}")
         place = pole_obj.pole[y][x]
         if place == 0:
             pole_obj.pole[y][x] = 3
