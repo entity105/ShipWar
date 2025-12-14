@@ -26,7 +26,7 @@ class BattleShip:
     @staticmethod
     def find_ship(x_y0: tuple, pole_obj):
         """x, y -> ссылка на корабль + индекс координаты"""
-        x_y = x_y0[0], x_y0[1]
+        x_y = x_y0[0] + 1, 10 - x_y0[1]
         for ship in pole_obj.get_ships():
             coords = tuple(ship.get_cords())
             if x_y in coords:
@@ -44,7 +44,7 @@ class BattleShip:
             print('Координаты всех кораблей:')
             for ship_d in pole_obj.get_ships():
                 print(tuple(ship_d.get_cords()))
-            # raise ValueError
+            raise ValueError
 
 
     def smart_shooting(self, x0, y0, pole_obj):
@@ -72,7 +72,7 @@ class BattleShip:
 
         # Если попал, то нужно продолжить стрельбу в этом направлении
         while damage == 2:  # Пока попадаем
-            if self.find_ship((x - 1, -y), pole_obj)[0].is_destroyed():  # Если корабль уничтожен
+            if self.find_ship((x, y), pole_obj)[0].is_destroyed():  # Если корабль уничтожен
                 self.start_cords_s = None
                 return True
             if dx != 0:     # Сдвигаемся по направлению
@@ -92,7 +92,7 @@ class BattleShip:
             damage = 2
             while damage == 2:  # пока попадаем
                 damage = self.shot(x, y, pole_obj)      # Стреляем
-                if self.find_ship((x - 1, -y), pole_obj)[0].is_destroyed():  # если корабль уничтожен
+                if self.find_ship((x, y), pole_obj)[0].is_destroyed():  # если корабль уничтожен
                     break
                 x -= dx
                 y -= dy
@@ -118,7 +118,7 @@ class BattleShip:
                     continue
                 if damage != 2:                         # Если стрельнул, но не попал -> завершить попытку
                     break
-                if self.find_ship((x-1,-y), pole_obj)[0].is_destroyed():  # Если попал и уничтожил занаво берём произвольные x y
+                if self.find_ship((x,y), pole_obj)[0].is_destroyed():  # Если попал и уничтожил занаво берём произвольные x y
                     continue
                 # Если попал и не уничтожил
                 b = self.smart_shooting(x, y, pole_obj)     # Уничтожает весь корабль или сохраняет координаты при промахе

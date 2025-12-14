@@ -92,8 +92,8 @@ class PredGame(BaseWindow):
 
     def auto(self):
         self.player_field.field_data.init()
-        self.data_save = self.player_field.field_data.pole      # Сохраняем матрицу
-        self.player_field.matrix = self.data_save
+        self.data_save = self.player_field.field_data.pole, self.player_field.field_data.get_ships()  # Сохраняем матрицу и список кораблей
+        self.player_field.matrix = self.data_save[0]
         self.player_field.canvas.delete("all")
         self.player_field.draw_pole()
 
@@ -104,14 +104,15 @@ class PredGame(BaseWindow):
 
     def start_game(self):
         self.win.destroy()
-        game = GameWindow(self.data_save)
+        game = GameWindow(*self.data_save)
         self.win = game.win
 
 
 class GameWindow(BaseWindow):
-    def __init__(self, matrix_player):
+    def __init__(self, matrix_player, ships_list):
         self.player_field = self.computer_field = None
         self.matrix_player = matrix_player
+        self.ships = ships_list
         super().__init__()
         # self.win = tk.Tk()
         # self.win_place()
@@ -130,7 +131,9 @@ class GameWindow(BaseWindow):
         self.computer_field.player = self.player_field
 
         self.player_field.matrix = self.matrix_player
+        self.player_field.field_data.set_ships(self.ships)
         print(f'win_init {self.player_field.matrix}')
+        print(f'win_init {self.player_field.field_data.get_ships()}')
         self.player_field.draw_pole()
         self.computer_field.draw_pole()
 

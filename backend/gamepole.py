@@ -115,6 +115,9 @@ class GamePole:
     def get_ships(self):
         return self._ships
 
+    def set_ships(self, lst):
+        self._ships = lst
+
     def ships_cords(self):
         """Координаты поля, совпадающие с координатами кораблей"""
         return (coord for ship in self._ships if ship.get_start_cords() != (None, None) for coord in ship.get_cords())
