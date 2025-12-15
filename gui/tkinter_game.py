@@ -132,8 +132,6 @@ class GameWindow(BaseWindow):
 
         self.player_field.matrix = self.matrix_player
         self.player_field.field_data.set_ships(self.ships)
-        print(f'win_init {self.player_field.matrix}')
-        print(f'win_init {self.player_field.field_data.get_ships()}')
         self.player_field.draw_pole()
         self.computer_field.draw_pole()
 

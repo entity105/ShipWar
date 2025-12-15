@@ -33,23 +33,12 @@ class BattleShip:
                 for i, coord in enumerate(coords):
                     if x_y == coord:
                         return ship, i
-        # raise Exception("Не найден корабль (метод find_ship)")
-        else:   # отладка
-            print(f'Матричные координаты корабля, в которого попали: {x_y0}\n')
-            print(f'Преобразованные координаты: {x_y}\n')
-            print('Поле:')
-            print('***********************************************')
-            pole_obj.show()
-            print('***********************************************')
-            print('Координаты всех кораблей:')
-            for ship_d in pole_obj.get_ships():
-                print(tuple(ship_d.get_cords()))
-            raise ValueError
+        raise Exception("Не найден корабль (метод find_ship)")
+
 
 
     def smart_shooting(self, x0, y0, pole_obj):
         """True - уничтожил корабль, False - промах"""
-        print('smart_shooting')
         damage = False
         dx, dy = 0, 0
         x, y = 0, 0
@@ -134,8 +123,6 @@ class BattleShip:
 
     def shot(self, x, y, pole_obj):
         """Одиночный выстрел по заданным координатам"""
-        print(f"x: {x}")
-        print(f"y: {y}")
         place = pole_obj.pole[y][x]
         if place == 0:
             pole_obj.pole[y][x] = 3

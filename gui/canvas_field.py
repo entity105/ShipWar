@@ -66,11 +66,8 @@ class BattlefieldPlayer(BattlefieldCanvas):
             self.canvas.place(x=60, y=80)
 
     def computer_shot(self):
-        print('Комп стреляет')
         self.field_data.pole = self.matrix
-        # print(self.field_data.pole)
-        self.battle_ship_obj.autoshot(self.field_data)   # Делает все выстрелы
-        # print(self.field_data.pole)
+        self.battle_ship_obj.autoshot(self.field_data)   # Делает все выстрелы (хотя бы 1 при промахе)
         self.canvas.delete("all")
         self.draw_pole()
         self.computer.enable_clicks()
@@ -91,7 +88,7 @@ class BattlefieldComputer(BattlefieldCanvas):
         self.click_binding = self.canvas.bind('<Button-1>', self.click_lkm)
 
     def click_lkm(self, event):
-        print('Игрок стреляет')
+        # print('Игрок стреляет')
         self.cell_x = event.x // self.cell_size  # от 0 до 9
         self.cell_y = event.y // self.cell_size  # от 0 до 9
 
@@ -102,13 +99,13 @@ class BattlefieldComputer(BattlefieldCanvas):
         self.processing_move()
 
     def is_hit(self):
-        for ship in self.field_data.get_ships():
-            if (self.cell_x, self.cell_y) in ship.get_cords():
-                return True
-        return False
+        if self.res == 1:   # Промах
+            return False
+        elif self.res == 2 or not self.res:     # Попали либо попытка стрельнуть в закрытую клетку
+            return True
 
     def processing_move(self):   # Обработка хода (что делать дальше)
-        if self.is_hit():  # Если попали
+        if self.is_hit():  # Если попали или стрельнули в закрытую клетку
             return
         # Если промах
         self.disable_clicks()       # Отключаем у нас клики (на поле бота)
