@@ -49,6 +49,7 @@ class BattleShip:
 
     def smart_shooting(self, x0, y0, pole_obj):
         """True - уничтожил корабль, False - промах"""
+        print('smart_shooting')
         damage = False
         dx, dy = 0, 0
         x, y = 0, 0
@@ -60,7 +61,7 @@ class BattleShip:
             x = x0 + dx  # Устанавливаем координаты
             y = y0 + dy
 
-            if not (1 <= x <= pole_obj.size) or not (1 <= y <= pole_obj.size):
+            if not (0 <= x < pole_obj.size) or not (0 <= y < pole_obj.size):
                 continue
 
             damage = self.shot(x, y, pole_obj)
@@ -80,7 +81,7 @@ class BattleShip:
             else:
                 y += dy
 
-            if not (1 <= x <= pole_obj.size) or not (1 <= y <= pole_obj.size):
+            if not (-1 < x < pole_obj.size) or not (-1 < y < pole_obj.size):    # Вся хуйня в этой проверке
                 damage = False
                 break
 

@@ -66,10 +66,11 @@ class BattlefieldPlayer(BattlefieldCanvas):
             self.canvas.place(x=60, y=80)
 
     def computer_shot(self):
+        print('Комп стреляет')
         self.field_data.pole = self.matrix
-        print(self.field_data.pole)
+        # print(self.field_data.pole)
         self.battle_ship_obj.autoshot(self.field_data)   # Делает все выстрелы
-        print(self.field_data.pole)
+        # print(self.field_data.pole)
         self.canvas.delete("all")
         self.draw_pole()
         self.computer.enable_clicks()
@@ -90,6 +91,7 @@ class BattlefieldComputer(BattlefieldCanvas):
         self.click_binding = self.canvas.bind('<Button-1>', self.click_lkm)
 
     def click_lkm(self, event):
+        print('Игрок стреляет')
         self.cell_x = event.x // self.cell_size  # от 0 до 9
         self.cell_y = event.y // self.cell_size  # от 0 до 9
 
