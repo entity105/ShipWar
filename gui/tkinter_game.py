@@ -1,5 +1,4 @@
 import tkinter as tk
-
 from backend.gameplay import BattleShip
 # from tkinter import ttk
 from gui.canvas_field import BattlefieldPlayer, BattlefieldComputer
@@ -135,18 +134,8 @@ class GameWindow(BaseWindow):
         self.player_field.draw_pole()
         self.computer_field.draw_pole()
 
-
-    # def game(self):
-
-
-
-
     def run(self):
         self.win.mainloop()
 
 
 a = MenuWindow()
-
-# Нужно сделать:
-# 1) start_game
-# 2) отображение/скрытие кораблей на поле - ВЫПОЛНЕНО
