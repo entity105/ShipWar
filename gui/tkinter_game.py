@@ -11,7 +11,6 @@ class BaseWindow:
         self.win = tk.Tk()
         self.win_place()
         self.win_init()
-        self.win.mainloop()
 
     @abstractmethod
     def win_place(self):
@@ -22,6 +21,9 @@ class BaseWindow:
     def win_init(self):
         """Наполнение окна"""
         pass
+
+    def run(self):
+        self.win.mainloop()
 
 
 class MenuWindow(BaseWindow):
@@ -134,8 +136,6 @@ class GameWindow(BaseWindow):
         self.player_field.draw_pole()
         self.computer_field.draw_pole()
 
-    def run(self):
-        self.win.mainloop()
 
 
-a = MenuWindow()
+

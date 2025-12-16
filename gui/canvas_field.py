@@ -104,7 +104,7 @@ class BattlefieldCanvas:
                               font=("Arial", 14))
         msg_label.pack(pady=10)
 
-        # Статистика (опционально)
+        # Статистика (опционально)                  # Мб время игры, кол-во выстрелов
         # stats_frame = ttk.Frame(result_window)
         # stats_frame.pack(pady=20)
         #
@@ -116,15 +116,22 @@ class BattlefieldCanvas:
         button_frame.pack(pady=30)
 
         # Кнопка "Новая игра"
-        # ttk.Button(button_frame, text="🔄 Новая игра",
-        #            command=lambda: [result_window.destroy(), self.new_game()],
-        #            width=15).pack(side=tk.LEFT, padx=10)
+        ttk.Button(button_frame, text="🔄 Новая игра",
+                   command=lambda: [self.close_windows(), self.new_game_after()],
+                   width=15).pack(side=tk.LEFT, padx=10)
 
         # Кнопка "Выход"
         ttk.Button(button_frame, text="🚪 Выход",
-                   command=lambda: [win.destroy() for win in self.parent.winfo_children()] +
-                                   [self.parent.destroy()],   # уничтожаем все открытые окна
+                   command=lambda: self.close_windows,
                    width=15).pack(side=tk.LEFT, padx=10)
+
+    def new_game_after(self):
+        from gui.tkinter_game import PredGame
+        n_g = PredGame()
+        self.parent = n_g.win
+
+    def close_windows(self):    # уничтожаем все открытые окна
+        return [win.destroy() for win in self.parent.winfo_children()] + [self.parent.destroy()]
 
 
 class BattlefieldPlayer(BattlefieldCanvas):
@@ -142,7 +149,7 @@ class BattlefieldPlayer(BattlefieldCanvas):
         self.field_data.pole = self.matrix
         self.battle_ship_obj.autoshot(self.field_data)   # Делает все выстрелы (хотя бы 1 при промахе)
         if self.destroyed_ships() == 10:  # Если поле игрока уничтожено => поражение
-            self.parent.after(300, self.show_game_result, False)
+            self.parent.after(100, self.show_game_result, False)
         self.canvas.delete("all")
         self.draw_pole()
         self.computer.enable_clicks()
@@ -182,7 +189,7 @@ class BattlefieldComputer(BattlefieldCanvas):
     def processing_move(self):   # Обработка хода (что делать дальше)
         if self.is_hit():  # Если попали или стрельнули в закрытую клетку
             if self.destroyed_ships() == 10:    # Если поле бота уничтожено => победа
-                self.parent.after(300, self.show_game_result, True)
+                self.parent.after(100, self.show_game_result, True)
             return
         # Если промах
         self.disable_clicks()       # Отключаем у нас клики (на поле бота)
