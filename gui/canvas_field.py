@@ -122,7 +122,7 @@ class BattlefieldCanvas:
 
         # Кнопка "Выход"
         ttk.Button(button_frame, text="🚪 Выход",
-                   command=lambda: self.close_windows,
+                   command=self.close_windows,
                    width=15).pack(side=tk.LEFT, padx=10)
 
     def new_game_after(self):
