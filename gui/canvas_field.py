@@ -23,6 +23,37 @@ class BattlefieldCanvas:
 
         self.show_ships = None
 
+    def create_coordinate_system(self, canvas_x, canvas_y, cell_size, field_size=500):
+        cell_size = cell_size
+        field_size = field_size
+
+        # БУКВЫ для вертикальной оси
+        letters = ['А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ж', 'З', 'И', 'К']
+
+        # БУКВЫ СЛЕВА от поля
+        for i, letter in enumerate(letters):
+            label_y = canvas_y + i * cell_size + cell_size // 2
+
+            tk.Label(self.parent,  # или self.win - главное окно
+                     text=letter,
+                     font=("Arial", 12, "bold"),
+                     bg='SystemButtonFace',  # цвет фона как у окна
+                     width=2,
+                     height=1).place(x=canvas_x - 35,  # слева от Canvas
+                                     y=label_y - 10)  # выравниваем по центру клетки
+
+        # ЦИФРЫ ПОД полем
+        for i in range(1, 11):
+            label_x = canvas_x + (i - 1) * cell_size + cell_size // 2
+
+            tk.Label(self.parent,
+                     text=str(i),
+                     font=("Arial", 12, "bold"),
+                     bg='SystemButtonFace',
+                     width=2,
+                     height=1).place(x=label_x - 10,
+                                     y=canvas_y + field_size + 15)
+
     def make_cell(self, x0, y0, state):
         x, y = x0 + self.cell_size, y0 + self.cell_size     # Конечные координаты клеточки
 
@@ -140,8 +171,10 @@ class BattlefieldPlayer(BattlefieldCanvas):
         self.show_ships = True
         if begin:
             self.canvas.place(x=100, y=40)
+            self.create_coordinate_system(100, 40, 65, 650)
         else:
             self.canvas.place(x=60, y=80)
+            self.create_coordinate_system(60, 80, 50)
             self.score_label = tk.Label(
                 self.parent,
                 text=f"Количество поражённых кораблей: {self.count}/10",
@@ -167,6 +200,7 @@ class BattlefieldPlayer(BattlefieldCanvas):
         self.destroyed_ships()
         self.score_label.config(text=f"Количество поражённых кораблей: {self.count}/10")
         if self.count == 10:  # Если поле игрока уничтожено => поражение
+            self.computer.disable_clicks()
             self.parent.after(100, self.show_game_result, False)
         self.canvas.delete("all")
         self.draw_pole()
@@ -182,6 +216,7 @@ class BattlefieldComputer(BattlefieldCanvas):
         self.show_ships = False
         self.res = None
         self.canvas.place(x=200+size, y=80)
+        self.create_coordinate_system(200+size, 80, 50)
 
         self.cell_x = self.cell_y = None
 
@@ -230,6 +265,7 @@ class BattlefieldComputer(BattlefieldCanvas):
     def processing_move(self):   # Обработка хода (что делать дальше)
         if self.is_hit():  # Если попали или стрельнули в закрытую клетку
             if self.count == 10:    # Если поле бота уничтожено => победа
+                self.disable_clicks()
                 self.parent.after(100, self.show_game_result, True)
             return
         # Если промах
