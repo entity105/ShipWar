@@ -6,3 +6,4 @@ tkinter_learn.py
 /backend/__pycache__
 gui/__pycache__/canvas_field.cpython-313.pyc
 gui/__pycache__/__init__.cpython-313.pyc
+/gui/__pycache__

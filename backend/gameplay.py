@@ -1,5 +1,4 @@
 from random import randint, choice
-
 from backend.gamepole import GamePole
 
 

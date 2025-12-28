@@ -1,12 +1,9 @@
 import tkinter as tk
-from backend.gameplay import BattleShip
-# from tkinter import ttk
 from gui.canvas_field import BattlefieldPlayer, BattlefieldComputer
-from abc import abstractmethod
-from random import choice
+from abc import ABC, abstractmethod
 
 
-class BaseWindow:
+class BaseWindow(ABC):
     def __init__(self):
         self.win = tk.Tk()
         self.win_place()
@@ -114,12 +111,11 @@ class GameWindow(BaseWindow):
         self.player_field = self.computer_field = None
         self.matrix_player = matrix_player
         self.ships = ships_list
+        self.exit = None
         super().__init__()
         # self.win = tk.Tk()
         # self.win_place()
         # self.win_init()
-        # self.win.mainloop()
-
 
     def win_place(self):
         self.win.geometry('1980x920')
@@ -136,6 +132,10 @@ class GameWindow(BaseWindow):
         self.player_field.draw_pole()
         self.computer_field.draw_pole()
 
+        self.win.config(background='#def6f7')
+        self.win.title("Игра")
 
+        tk.Button(self.win, text="Выход", font=("Arial", 22), command=self.close_windows).place(x=1400, y=730)
 
-
+    def close_windows(self):    # уничтожаем все открытые окна
+        return [win.destroy() for win in self.win.winfo_children()] + [self.win.destroy()]

@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import messagebox, ttk
+from tkinter import ttk
 from backend.gamepole import GamePole
 from backend.gameplay import BattleShip
 
@@ -58,6 +58,7 @@ class BattlefieldCanvas:
     def destroyed_ships(self) -> int:       # Возвращает количество уничтоженных кораблей
         ships = self.field_data.get_ships()
         n = 0
+        self.count = 0
         for ship in ships:
             if ship.is_destroyed():
                 n += 1
@@ -67,11 +68,19 @@ class BattlefieldCanvas:
     def show_game_result(self, player_won):
         """Показывает окно с результатом игры"""
 
-        # 1. Создаём новое модальное окно
+        if player_won:
+            title = "🎉 ПОБЕДА!"
+            message = "Вы уничтожили все корабли противника!"
+            color = "#4CAF50"  # шрифт - Зелёный
+        else:
+            title = "💀 ПОРАЖЕНИЕ"
+            message = "Все ваши корабли потоплены!"
+            color = "#F44336"  # Красный
+
+        # координаты для центрирования
         screen_width = self.parent.winfo_screenwidth()
         screen_height = self.parent.winfo_screenheight()
 
-        # координаты для центрирования
         x = (screen_width - 400) // 2
         y = (screen_height - 300) // 2
         result_window = tk.Toplevel(self.parent)
@@ -82,17 +91,6 @@ class BattlefieldCanvas:
         result_window.transient(self.parent)  # Поверх главного окна
         result_window.grab_set()
 
-        title = message = color = None
-        if player_won:
-            title = "🎉 ПОБЕДА!"
-            message = "Вы уничтожили все корабли противника!"
-            color = "#4CAF50"  # Зелёный
-        else:
-            title = "💀 ПОРАЖЕНИЕ"
-            message = "Все ваши корабли потоплены!"
-            color = "#F44336"  # Красный
-
-        # 4. Визуальные элементы
         # Заголовок
         title_label = ttk.Label(result_window, text=title,
                                 font=("Arial", 24, "bold"),
@@ -104,14 +102,14 @@ class BattlefieldCanvas:
                               font=("Arial", 14))
         msg_label.pack(pady=10)
 
-        # Статистика (опционально)                  # Мб время игры, кол-во выстрелов
+        # Мб время игры, кол-во выстрелов
         # stats_frame = ttk.Frame(result_window)
         # stats_frame.pack(pady=20)
         #
         # ttk.Label(stats_frame, text=f"Ваши попадания: {self.player_hits}").grid(row=0, column=0, padx=10)
         # ttk.Label(stats_frame, text=f"Попадания противника: {self.computer_hits}").grid(row=0, column=1, padx=10)
 
-        # 5. Кнопки действий
+        # кнопки действий
         button_frame = ttk.Frame(result_window)
         button_frame.pack(pady=30)
 
@@ -144,11 +142,31 @@ class BattlefieldPlayer(BattlefieldCanvas):
             self.canvas.place(x=100, y=40)
         else:
             self.canvas.place(x=60, y=80)
+            self.score_label = tk.Label(
+                self.parent,
+                text=f"Количество поражённых кораблей: {self.count}/10",
+                font=("Arial", 22),
+                bd=3,
+                bg="#e56e61",
+                relief="ridge",
+                padx=5, pady=3
+            )
+            self.score_label.place(x=60, y=720)
+
+            self.computer_label = tk.Label(
+                self.parent,
+                text="You",
+                font=("Arial", 30),
+                bg="#def6f7", fg="#481d19"
+            )
+            self.computer_label.place(x=300, y=25)
 
     def computer_shot(self):
         self.field_data.pole = self.matrix
         self.battle_ship_obj.autoshot(self.field_data)   # Делает все выстрелы (хотя бы 1 при промахе)
-        if self.destroyed_ships() == 10:  # Если поле игрока уничтожено => поражение
+        self.destroyed_ships()
+        self.score_label.config(text=f"Количество поражённых кораблей: {self.count}/10")
+        if self.count == 10:  # Если поле игрока уничтожено => поражение
             self.parent.after(100, self.show_game_result, False)
         self.canvas.delete("all")
         self.draw_pole()
@@ -169,6 +187,25 @@ class BattlefieldComputer(BattlefieldCanvas):
 
         self.click_binding = self.canvas.bind('<Button-1>', self.click_lkm)
 
+        self.score_label = tk.Label(
+            self.parent,
+            text=f"Количество уничтоженных кораблей: {self.count}/10",
+            font=("Arial", 22),
+            bd=3,
+            bg="lightgreen",
+            relief="ridge",
+            padx=5, pady=3
+        )
+        self.score_label.place(x=60, y=640)
+
+        self.computer_label = tk.Label(
+            self.parent,
+            text="Enemy",
+            font=("Arial", 30),
+            bg="#def6f7", fg="#481d19"
+        )
+        self.computer_label.place(x=900, y=25)
+
     def click_lkm(self, event):
         # print('Игрок стреляет')
         self.cell_x = event.x // self.cell_size  # от 0 до 9
@@ -183,12 +220,16 @@ class BattlefieldComputer(BattlefieldCanvas):
     def is_hit(self):
         if self.res == 1:   # Промах
             return False
-        elif self.res == 2 or not self.res:     # Попали либо попытка стрельнуть в закрытую клетку
+        elif self.res == 2:     # Попали
+            self.destroyed_ships()
+            self.score_label.config(text=f"Количество уничтоженных кораблей: {self.count}/10")
+            return True
+        elif not self.res:      # Попытка стрельнуть в закрытую клетку
             return True
 
     def processing_move(self):   # Обработка хода (что делать дальше)
         if self.is_hit():  # Если попали или стрельнули в закрытую клетку
-            if self.destroyed_ships() == 10:    # Если поле бота уничтожено => победа
+            if self.count == 10:    # Если поле бота уничтожено => победа
                 self.parent.after(100, self.show_game_result, True)
             return
         # Если промах
