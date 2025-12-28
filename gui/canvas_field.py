@@ -167,6 +167,7 @@ class BattlefieldPlayer(BattlefieldCanvas):
         self.destroyed_ships()
         self.score_label.config(text=f"Количество поражённых кораблей: {self.count}/10")
         if self.count == 10:  # Если поле игрока уничтожено => поражение
+            self.computer.disable_clicks()
             self.parent.after(100, self.show_game_result, False)
         self.canvas.delete("all")
         self.draw_pole()
@@ -230,6 +231,7 @@ class BattlefieldComputer(BattlefieldCanvas):
     def processing_move(self):   # Обработка хода (что делать дальше)
         if self.is_hit():  # Если попали или стрельнули в закрытую клетку
             if self.count == 10:    # Если поле бота уничтожено => победа
+                self.disable_clicks()
                 self.parent.after(100, self.show_game_result, True)
             return
         # Если промах

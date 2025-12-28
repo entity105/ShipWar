@@ -8,6 +8,8 @@ class BaseWindow(ABC):
         self.win = tk.Tk()
         self.win_place()
         self.win_init()
+        icon = tk.PhotoImage(file='ship.png')
+        self.win.iconphoto(False, icon)
 
     @abstractmethod
     def win_place(self):
@@ -30,6 +32,7 @@ class MenuWindow(BaseWindow):
     def win_place(self):
         self.win.geometry('720x700+360+80')
         self.win.config(bg='#b0f3f7')
+        self.win.title("Морской бой v1.0")
 
     def win_init(self):
         """Наполнение окна"""
@@ -68,6 +71,7 @@ class PredGame(BaseWindow):
     def win_place(self):
         self.win.geometry('1980x920')
         self.win.config(bg='#c5d8e7')
+        self.win.title("Размещение кораблей")
 
     def win_init(self):
         self.player_field = BattlefieldPlayer(self.win, size=650)
