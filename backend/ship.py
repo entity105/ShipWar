@@ -23,18 +23,6 @@ class Ship:
     def is_destroyed(self):
         return self.cells.count(2) == self.get_length()
 
-    @staticmethod
-    def distance(coords1, coords2):
-        return ((coords1[0] - coords2[0]) ** 2) + ((coords1[1] - coords2[1]) ** 2) ** 0.5
-
-    def is_collide(self, ship):
-        if not isinstance(ship, Ship):
-            print("Это не корабль!")
-            return
-        if all(self.distance(coord0, coord1) > 1 for coord0, coord1 in zip(self.get_cords(), ship.get_cords())):
-            return False
-        return True
-
     def set_tp(self, value):
         if isinstance(value, int) and value in (1, 2):
             self._tp = value

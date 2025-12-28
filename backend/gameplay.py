@@ -151,5 +151,3 @@ class BattleShip:
     #         while count_strike2 == 2:
     #             count_strike2 = self.autoshot(p_2)
     #     pass
-
-
